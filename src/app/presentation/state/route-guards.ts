@@ -8,11 +8,24 @@ import { ChallengeStore } from './challenge-store';
  * Note: inject() only works before the first `await`, so each guard reads what it needs first.
  */
 
-/** Today, Progress and History need a challenge; without one the app opens New challenge. */
+/**
+ * Today, Progress and History need a challenge; without one the app opens New challenge.
+ * Right after day 30 the Celebration screen comes first (BR-10).
+ */
 export const requireChallenge: CanActivateFn = async () => {
   const router = inject(Router);
   const overview = await inject(ChallengeStore).load();
-  return overview !== null ? true : router.createUrlTree(['/new-challenge']);
+  if (overview === null) {
+    return router.createUrlTree(['/new-challenge']);
+  }
+  return overview.needsCelebration ? router.createUrlTree(['/celebration']) : true;
+};
+
+/** The Celebration screen only opens once, for a challenge that has just finished (BR-10). */
+export const requireCelebration: CanActivateFn = async () => {
+  const router = inject(Router);
+  const overview = await inject(ChallengeStore).load();
+  return overview?.needsCelebration ? true : router.createUrlTree(['/today']);
 };
 
 /** New challenge is only for when no challenge is running (one active challenge at a time). */

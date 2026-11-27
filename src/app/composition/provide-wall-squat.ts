@@ -11,7 +11,9 @@ import {
   Clock,
   DeleteAttemptUseCase,
   ExportHistoryCsvUseCase,
+  FileSharer,
   GetChallengeOverviewUseCase,
+  GetSessionHistoryUseCase,
   IdGenerator,
   MarkCelebrationShownUseCase,
   RecordAttemptUseCase,
@@ -20,6 +22,7 @@ import {
   SoundPlayer,
   StartChallengeUseCase,
 } from '../application';
+import { BrowserFileSharer } from '../infrastructure/device/browser-file-sharer';
 import { BrowserScreenWakeLock } from '../infrastructure/device/browser-screen-wake-lock';
 import { RandomIdGenerator } from '../infrastructure/device/random-id-generator';
 import { SystemClock } from '../infrastructure/device/system-clock';
@@ -41,6 +44,7 @@ export const CLOCK = new InjectionToken<Clock>('Clock');
 export const ID_GENERATOR = new InjectionToken<IdGenerator>('IdGenerator');
 export const SOUND_PLAYER = new InjectionToken<SoundPlayer>('SoundPlayer');
 export const SCREEN_WAKE_LOCK = new InjectionToken<ScreenWakeLock>('ScreenWakeLock');
+export const FILE_SHARER = new InjectionToken<FileSharer>('FileSharer');
 
 export function provideWallSquat(): EnvironmentProviders {
   return makeEnvironmentProviders([
@@ -58,6 +62,7 @@ export function provideWallSquat(): EnvironmentProviders {
     { provide: ID_GENERATOR, useFactory: () => new RandomIdGenerator() },
     { provide: SOUND_PLAYER, useFactory: () => new WebAudioSoundPlayer() },
     { provide: SCREEN_WAKE_LOCK, useFactory: () => new BrowserScreenWakeLock() },
+    { provide: FILE_SHARER, useFactory: () => new BrowserFileSharer() },
 
     // Use cases
     {
@@ -73,6 +78,15 @@ export function provideWallSquat(): EnvironmentProviders {
       provide: GetChallengeOverviewUseCase,
       useFactory: () =>
         new GetChallengeOverviewUseCase(
+          inject(CHALLENGE_REPOSITORY),
+          inject(ATTEMPT_REPOSITORY),
+          inject(CLOCK),
+        ),
+    },
+    {
+      provide: GetSessionHistoryUseCase,
+      useFactory: () =>
+        new GetSessionHistoryUseCase(
           inject(CHALLENGE_REPOSITORY),
           inject(ATTEMPT_REPOSITORY),
           inject(CLOCK),

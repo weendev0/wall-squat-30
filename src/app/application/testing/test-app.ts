@@ -1,6 +1,7 @@
 import { DeleteAttemptUseCase } from '../use-cases/delete-attempt.use-case';
 import { ExportHistoryCsvUseCase } from '../use-cases/export-history-csv.use-case';
 import { GetChallengeOverviewUseCase } from '../use-cases/get-challenge-overview.use-case';
+import { GetSessionHistoryUseCase } from '../use-cases/get-session-history.use-case';
 import { MarkCelebrationShownUseCase } from '../use-cases/mark-celebration-shown.use-case';
 import { RecordAttemptUseCase } from '../use-cases/record-attempt.use-case';
 import { ResetHistoryUseCase } from '../use-cases/reset-history.use-case';
@@ -25,6 +26,7 @@ export function createTestApp(startDate = '2026-11-16') {
     clock,
     startChallenge: new StartChallengeUseCase(challenges, clock, ids),
     getOverview: new GetChallengeOverviewUseCase(challenges, attempts, clock),
+    getSessionHistory: new GetSessionHistoryUseCase(challenges, attempts, clock),
     recordAttempt: new RecordAttemptUseCase(challenges, attempts, clock, ids),
     deleteAttempt: new DeleteAttemptUseCase(attempts),
     markCelebrationShown: new MarkCelebrationShownUseCase(challenges),

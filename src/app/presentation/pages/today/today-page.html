@@ -1,7 +1,10 @@
 @if (overview(); as overview) {
   <main class="screen screen-in-tabs">
     @if (today(); as today) {
-      <p class="eyebrow">Day {{ today.dayNumber }} of {{ challengeLength }}</p>
+      <header class="top">
+        <p class="eyebrow">Day {{ today.dayNumber }} of {{ challengeLength }}</p>
+        <a class="settings-link" routerLink="/settings" aria-label="Settings">⚙</a>
+      </header>
       <h1 class="screen-title">Today</h1>
 
       @if (savedNotice(); as notice) {
@@ -67,13 +70,6 @@
           }
         </ol>
       </section>
-    } @else {
-      <h1 class="screen-title">Challenge finished</h1>
-      <p class="muted">
-        You reached the target on {{ overview.progress.daysComplete }} of
-        {{ challengeLength }} days. Your history is kept.
-      </p>
-      <a class="button-primary link-button" routerLink="/new-challenge">Start a new challenge</a>
     }
   </main>
 }

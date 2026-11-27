@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Attempt, DayStatus, formatDuration } from '../../../domain';
 import { DurationPipe } from '../../shared/duration.pipe';
 import { shortDateLabel } from '../../shared/date-label';
@@ -33,7 +34,7 @@ const MIN_BAR_HEIGHT = 0.03;
 /** Screen 5: totals, the best hold of each day as a chart, and the latest attempts. */
 @Component({
   selector: 'app-history-page',
-  imports: [DurationPipe],
+  imports: [DurationPipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './history-page.html',
   styleUrl: './history-page.scss',

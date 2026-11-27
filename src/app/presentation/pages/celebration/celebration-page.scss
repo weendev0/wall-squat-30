@@ -1,0 +1,55 @@
+.celebration {
+  position: relative;
+  align-items: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.piece {
+  position: absolute;
+  height: 4px;
+  border-radius: 1px;
+  opacity: 0.85;
+}
+
+.trophy {
+  margin-top: 48px;
+  font-size: 72px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin: 8px 0 0;
+
+  dd {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+  }
+}
+
+.stat {
+  text-align: left;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: auto;
+}
+
+// Keep the text and buttons above the confetti.
+.celebration > :not(.confetti) {
+  position: relative;
+}

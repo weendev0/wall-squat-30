@@ -36,14 +36,12 @@ describe('Today screen', () => {
     expect(screen.currentUrl()).toBe('/timer');
   });
 
-  it('offers a new challenge once day 30 has passed', async () => {
+  it('gives way to the Celebration screen once day 30 has passed', async () => {
     fakes.clock.currentDate = '2026-12-16';
 
     const screen = await openScreen('/today');
 
-    expect(screen.text()).toContain('Challenge finished');
-    await screen.click('Start a new challenge');
-    expect(screen.currentUrl()).toBe('/new-challenge');
+    expect(screen.currentUrl()).toBe('/celebration');
   });
 
   it('shows the tab bar with Progress and History', async () => {
