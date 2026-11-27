@@ -1,0 +1,70 @@
+@let current = overview();
+<p class="eyebrow muted-eyebrow">{{ current.challenge.name }} · started {{ startedLabel() }}</p>
+<h1 class="screen-title">Progress</h1>
+
+<section class="card summary">
+  <div class="summary-row">
+    <strong class="summary-count"
+      >{{ current.progress.daysComplete }} of {{ challengeLength }} days</strong
+    >
+    <span class="muted">{{ daysToGo() }} to go</span>
+  </div>
+  <div
+    class="bar"
+    role="progressbar"
+    [attr.aria-valuenow]="current.progress.daysComplete"
+    aria-valuemin="0"
+    [attr.aria-valuemax]="challengeLength"
+  >
+    <div class="bar-fill" [style.width.%]="completedShare() * 100"></div>
+  </div>
+  <p class="muted small">
+    Current streak {{ current.progress.currentStreak }}
+    {{ current.progress.currentStreak === 1 ? 'day' : 'days' }} · {{ missedDayCount() }} missed
+  </p>
+</section>
+
+<ol class="grid" aria-label="The 30 days">
+  @for (cell of cells(); track cell.dayNumber) {
+    <li
+      class="cell"
+      [class]="cell.status"
+      [class.today]="cell.isToday"
+      [attr.aria-label]="cell.accessibleLabel"
+    >
+      <span class="cell-number">{{ cell.dayNumber }}</span>
+      <span class="cell-caption">{{ cell.caption }}</span>
+      @if (cell.isMadeUp) {
+        <span class="marker made-up" title="Made up later" aria-hidden="true">↺</span>
+      }
+      @if (cell.hasNote) {
+        <span class="marker manual" title="Has a note" aria-hidden="true">✎</span>
+      }
+    </li>
+  }
+</ol>
+
+<ul class="legend" aria-label="Legend">
+  <li><span class="swatch complete"></span>Done</li>
+  <li><span class="swatch missed"></span>Missed</li>
+  <li><span class="swatch upcoming"></span>Upcoming</li>
+  <li><span aria-hidden="true">↺</span> Made up</li>
+  <li><span aria-hidden="true">✎</span> Has a note</li>
+</ul>
+
+@if (makeUpDay(); as dayNumber) {
+  <section class="card make-up">
+    <div>
+      <strong>Day {{ dayNumber }} was missed</strong>
+      <p class="muted small">
+        Make it up any time. It counts toward your 30 days, not your streak.
+      </p>
+    </div>
+    <a
+      class="make-up-button"
+      [routerLink]="['/check-in', current.challenge.id]"
+      [queryParams]="{ day: dayNumber }"
+      >Make up</a
+    >
+  </section>
+}

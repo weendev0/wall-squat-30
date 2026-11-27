@@ -14,29 +14,48 @@
 
   <span class="trophy" aria-hidden="true">🏆</span>
   <h1 class="screen-title">{{ challengeLength }} days done!</h1>
-  <p class="muted">You finished the Wall Squat Challenge. Your legs earned this one.</p>
 
-  <dl class="stats">
-    <div class="card stat">
-      <dt class="field-label">Days complete</dt>
-      <dd>{{ overview.progress.daysComplete }}/{{ challengeLength }}</dd>
-    </div>
-    <div class="card stat">
-      <dt class="field-label">Best hold</dt>
-      <dd>{{ overview.progress.bestHoldSeconds | duration }}</dd>
-    </div>
-    <div class="card stat">
-      <dt class="field-label">Total time</dt>
-      <dd>{{ overview.progress.totalSeconds | duration }}</dd>
-    </div>
-    <div class="card stat">
-      <dt class="field-label">Longest streak</dt>
-      <dd>
-        {{ overview.progress.longestStreak }}
-        {{ overview.progress.longestStreak === 1 ? 'day' : 'days' }}
-      </dd>
-    </div>
-  </dl>
+  @if (checkOff(); as checkOff) {
+    <p class="muted">You finished {{ checkOff.challenge.name }}. One day at a time, all the way.</p>
+
+    <dl class="stats">
+      <div class="card stat">
+        <dt class="field-label">Days done</dt>
+        <dd>{{ checkOff.progress.daysComplete }}/{{ challengeLength }}</dd>
+      </div>
+      <div class="card stat">
+        <dt class="field-label">Longest streak</dt>
+        <dd>
+          {{ checkOff.progress.longestStreak }}
+          {{ checkOff.progress.longestStreak === 1 ? 'day' : 'days' }}
+        </dd>
+      </div>
+    </dl>
+  } @else if (wallSquat; as wallSquat) {
+    <p class="muted">You finished the Wall Squat Challenge. Your legs earned this one.</p>
+
+    <dl class="stats">
+      <div class="card stat">
+        <dt class="field-label">Days complete</dt>
+        <dd>{{ wallSquat.progress.daysComplete }}/{{ challengeLength }}</dd>
+      </div>
+      <div class="card stat">
+        <dt class="field-label">Best hold</dt>
+        <dd>{{ wallSquat.progress.bestHoldSeconds | duration }}</dd>
+      </div>
+      <div class="card stat">
+        <dt class="field-label">Total time</dt>
+        <dd>{{ wallSquat.progress.totalSeconds | duration }}</dd>
+      </div>
+      <div class="card stat">
+        <dt class="field-label">Longest streak</dt>
+        <dd>
+          {{ wallSquat.progress.longestStreak }}
+          {{ wallSquat.progress.longestStreak === 1 ? 'day' : 'days' }}
+        </dd>
+      </div>
+    </dl>
+  }
 
   <div class="actions">
     <button type="button" class="button-primary" (click)="startNewChallenge()">

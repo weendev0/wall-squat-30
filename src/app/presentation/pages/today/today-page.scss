@@ -1,17 +1,23 @@
-.top {
+.title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.settings-link {
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.round-link {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  margin: -12px -12px -12px 0;
-  color: var(--color-text-secondary);
-  font-size: 24px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 22px;
   text-decoration: none;
 }
 
@@ -28,78 +34,49 @@
   }
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.stat strong {
-  font-size: 20px;
-}
-
-.target {
+.cards {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 12px;
 }
 
-.target-time {
-  font-size: 56px;
+// The button on each card, in the challenge's own colour (set by the card's tone class).
+.card-action {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 22px;
+  background: var(--tone);
+  color: var(--color-on-accent);
+  font-size: 15px;
   font-weight: 800;
-  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  cursor: pointer;
+
+  &.is-done {
+    background: var(--tone-dim);
+    color: var(--tone-soft);
+  }
 }
 
-.today-best {
-  margin-top: 4px;
-}
-
-.start {
-  min-height: 72px;
-  font-size: 22px;
-  letter-spacing: 0.08em;
-}
-
-.hint {
-  margin-top: -8px;
-  font-size: 13px;
-  text-align: center;
-}
-
-.recent {
-  display: flex;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.day {
-  display: flex;
-  flex: 0 0 calc((100% - 6 * 8px) / 7); // always 7 columns, so the days line up from the left
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+.muted-eyebrow {
   color: var(--color-text-secondary);
-  font-size: 11px;
 }
 
-.dot {
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--color-border);
-  border-radius: 50%;
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.complete .dot {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-}
-
-.under-target .dot {
-  border-color: var(--color-accent);
-}
-
-.pending .dot {
-  border: 2px dashed var(--color-accent);
+.empty-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }

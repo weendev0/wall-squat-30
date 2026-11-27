@@ -1,9 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CHALLENGE_LENGTH_DAYS, DayResult, DayStatus, formatDuration } from '../../../domain';
 import { DurationPipe } from '../../shared/duration.pipe';
 import { shortDateLabel } from '../../shared/date-label';
+import { ChallengeTabs, selectedChallenge } from '../../shared/challenge-tabs';
 import { ChallengeStore } from '../../state/challenge-store';
+import { CheckOffStore } from '../../state/check-off-store';
+import { CheckOffProgress } from './check-off-progress';
 
 /** One square of the 30-day grid, ready to show. */
 interface DayCell {
@@ -26,16 +29,29 @@ interface MakeUpSuggestion {
   readonly reason: string;
 }
 
-/** Screen 4: the 30-day grid with today's result, the totals and the next make-up. */
+/**
+ * Screens 4 and 15: the 30-day grid with today's result, the totals and the next make-up.
+ * Tabs at the top switch between challenges; a check-off challenge shows CheckOffProgress.
+ */
 @Component({
   selector: 'app-progress-page',
-  imports: [DurationPipe, RouterLink],
+  imports: [ChallengeTabs, CheckOffProgress, DurationPipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './progress-page.html',
   styleUrl: './progress-page.scss',
 })
 export class ProgressPage {
   private readonly store = inject(ChallengeStore);
+
+  /** From ?challenge=<id>, set by the tabs. */
+  readonly challenge = input<string>();
+
+  protected readonly checkOffs = inject(CheckOffStore).active;
+  protected readonly selected = selectedChallenge(
+    this.challenge,
+    this.store.overview,
+    this.checkOffs,
+  );
 
   protected readonly challengeLength = CHALLENGE_LENGTH_DAYS;
   protected readonly overview = this.store.overview;

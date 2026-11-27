@@ -1,6 +1,7 @@
 import { CheckInUseCase } from '../use-cases/check-in.use-case';
 import { DeleteAttemptUseCase } from '../use-cases/delete-attempt.use-case';
 import { ExportHistoryCsvUseCase } from '../use-cases/export-history-csv.use-case';
+import { GetCheckOffOverviewsUseCase } from '../use-cases/get-check-off-overviews.use-case';
 import { GetChallengeOverviewUseCase } from '../use-cases/get-challenge-overview.use-case';
 import { GetSessionHistoryUseCase } from '../use-cases/get-session-history.use-case';
 import { MarkCelebrationShownUseCase } from '../use-cases/mark-celebration-shown.use-case';
@@ -35,11 +36,12 @@ export function createTestApp(startDate = '2026-11-16') {
     checkIn: new CheckInUseCase(challenges, checkIns, clock, ids),
     undoCheckIn: new UndoCheckInUseCase(challenges, checkIns),
     getOverview: new GetChallengeOverviewUseCase(challenges, attempts, clock),
+    getCheckOffOverviews: new GetCheckOffOverviewsUseCase(challenges, checkIns, clock),
     getSessionHistory: new GetSessionHistoryUseCase(challenges, attempts, clock),
     recordAttempt: new RecordAttemptUseCase(challenges, attempts, clock, ids),
     deleteAttempt: new DeleteAttemptUseCase(attempts),
     markCelebrationShown: new MarkCelebrationShownUseCase(challenges),
     resetHistory: new ResetHistoryUseCase(challenges, attempts, checkIns),
-    exportCsv: new ExportHistoryCsvUseCase(challenges, attempts),
+    exportCsv: new ExportHistoryCsvUseCase(challenges, attempts, checkIns),
   };
 }

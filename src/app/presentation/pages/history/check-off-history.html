@@ -1,0 +1,43 @@
+@let current = overview();
+<p class="eyebrow muted-eyebrow">{{ current.challenge.name }}</p>
+<h1 class="screen-title">History</h1>
+
+<section class="stats" aria-label="Totals">
+  <div class="card stat">
+    <span class="field-label">Days done</span>
+    <strong>{{ current.progress.daysComplete }}/{{ challengeLength }}</strong>
+  </div>
+  <div class="card stat">
+    <span class="field-label">Longest streak</span>
+    <strong>{{ current.progress.longestStreak }}</strong>
+  </div>
+  <div class="card stat">
+    <span class="field-label">Notes</span>
+    <strong>{{ noteCount() }}</strong>
+  </div>
+</section>
+
+<section aria-labelledby="notes-heading">
+  <h2 id="notes-heading" class="field-label">Your notes</h2>
+  @if (rows().length === 0) {
+    <p class="muted">Nothing yet. Each day you tap Done, it shows up here with its note.</p>
+  } @else {
+    <ul class="card recent">
+      @for (row of rows(); track row.id) {
+        <li class="recent-row note-row">
+          <span class="recent-text">
+            <strong>
+              {{ row.title }}
+              @if (row.isMakeUp) {
+                <span title="Made up later" aria-label="Made up later">↺</span>
+              }
+            </strong>
+            <span class="note-text" [class.muted]="!row.note">{{
+              row.note || 'Done, no note'
+            }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+  }
+</section>

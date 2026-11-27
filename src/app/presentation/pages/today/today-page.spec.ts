@@ -1,5 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { RecordAttemptUseCase, StartChallengeUseCase } from '../../../application';
+import {
+  CheckInUseCase,
+  RecordAttemptUseCase,
+  StartChallengeUseCase,
+  StartCheckOffChallengeUseCase,
+} from '../../../application';
 import { ChallengeStore } from '../../state/challenge-store';
 import { openScreen, setUpApp } from '../../testing/screen-test-helpers';
 
@@ -20,11 +25,11 @@ describe('Today screen', () => {
 
     const screen = await openScreen('/today');
 
-    expect(screen.text()).toContain('Day 2 of 30');
-    expect(screen.text()).toContain("Today's target 1:00");
-    expect(screen.text()).toContain('Best hold 1:12');
-    expect(screen.text()).toContain('Completed 1/30');
-    expect(screen.text()).toContain("Today's best 1:12 · 1 attempt");
+    expect(screen.text()).toContain('Exercise Day 2 of 30 Wall squat');
+    expect(screen.text()).toContain('Target 1:00 · best today 1:12 · 1 attempt');
+    expect(screen.text()).toContain('Streak 1 day');
+    expect(screen.text()).toContain('1/30 done');
+    expect(screen.text()).toContain('1 of 1 done today');
   });
 
   it('unlocks sound inside the tap and opens the timer', async () => {
@@ -65,6 +70,48 @@ describe('Today screen', () => {
     await screen.click('History');
     expect(screen.currentUrl()).toBe('/history');
     expect(screen.text()).toContain('Hold time per day');
+  });
+
+  it('BR-13: shows a card for each running challenge and opens Check-in from it', async () => {
+    const reading = await TestBed.inject(StartCheckOffChallengeUseCase).execute({
+      name: 'Atomic Habits',
+      category: 'reading',
+    });
+
+    const screen = await openScreen('/today');
+
+    expect(screen.text()).toContain('Reading Day 1 of 30 Atomic Habits Not done yet today');
+    expect(screen.text()).toContain('0 of 2 done today');
+
+    await screen.click('Done');
+    expect(screen.currentUrl()).toBe(`/check-in/${reading.id}`);
+  });
+
+  it('shows a check-off as done, with its note', async () => {
+    const reading = await TestBed.inject(StartCheckOffChallengeUseCase).execute({
+      name: 'Atomic Habits',
+      category: 'reading',
+    });
+    await TestBed.inject(CheckInUseCase).execute({ challengeId: reading.id, note: 'Chapter 1' });
+
+    const screen = await openScreen('/today');
+
+    expect(screen.text()).toContain('Atomic Habits Chapter 1 Done ✓');
+    expect(screen.text()).toContain('1 of 2 done today');
+  });
+
+  it('opens with only check-off challenges and no wall squat', async () => {
+    await fakes.challenges.deleteAll();
+    await TestBed.inject(StartCheckOffChallengeUseCase).execute({
+      name: 'AWS exam prep',
+      category: 'study',
+    });
+
+    const screen = await openScreen('/');
+
+    expect(screen.currentUrl()).toBe('/today');
+    expect(screen.text()).toContain('AWS exam prep');
+    expect(screen.hasButton('START')).toBe(false);
   });
 
   it('closes the saved message', async () => {

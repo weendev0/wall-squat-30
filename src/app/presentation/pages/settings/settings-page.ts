@@ -49,7 +49,7 @@ export class SettingsPage implements OnInit {
       return; // still preparing; the screen opened a moment ago
     }
     try {
-      const fileName = `wall-squat-history-${this.clock.today()}.csv`;
+      const fileName = `30-days-challenges-${this.clock.today()}.csv`;
       const outcome = await this.fileSharer.shareText(fileName, csv, CSV_MIME_TYPE);
       this.message.set(outcome === 'cancelled' ? '' : 'History exported.');
     } catch {

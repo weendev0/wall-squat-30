@@ -28,7 +28,10 @@ export async function openScreen(url: string) {
     currentUrl: () => router.url,
     /** Everything on screen as one string, one space between each piece of text. */
     text: () => visibleText(harness.routeNativeElement),
-    /** The button (or link) whose text matches, e.g. button('START'). Throws when missing. */
+    /**
+     * The button (or link) whose text matches, e.g. button('START'). Text from separate
+     * elements inside it is joined with one space. Throws when missing.
+     */
     button: (label: string) => findButton(harness.routeNativeElement, label),
     hasButton: (label: string) => findButtonOrNull(harness.routeNativeElement, label) !== null,
     /** Clicks, then waits for everything the click started (saving, navigation, rendering). */
@@ -54,7 +57,7 @@ function visibleText(root: HTMLElement | null): string {
 
 function findButtonOrNull(root: HTMLElement | null, label: string): HTMLElement | null {
   const candidates = [...(root?.querySelectorAll<HTMLElement>('button, a') ?? [])];
-  return candidates.find((element) => element.textContent?.trim() === label) ?? null;
+  return candidates.find((element) => visibleText(element) === label) ?? null;
 }
 
 function findButton(root: HTMLElement | null, label: string): HTMLElement {

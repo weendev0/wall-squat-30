@@ -1,0 +1,61 @@
+@let challenge = overview().challenge;
+<main class="screen" [class]="tone()">
+  <a class="back-link" routerLink="/today">‹ Today</a>
+  <div class="meta">
+    <span class="category-pill">{{ categoryLabels[challenge.category] }}</span>
+    <span class="muted small">
+      Day {{ dayNumber() }} of {{ challengeLength }} · {{ dateLabel() }}
+      @if (isMakeUp()) {
+        · make-up
+      }
+    </span>
+  </div>
+  <h1 class="screen-title">{{ challenge.name }}</h1>
+
+  <section class="done-area">
+    <button
+      type="button"
+      class="done-button"
+      [class.is-done]="done()"
+      [attr.aria-pressed]="done()"
+      [attr.aria-label]="done() ? 'Done, tap to undo' : 'Mark as done'"
+      (click)="toggleDone()"
+    >
+      <svg
+        aria-hidden="true"
+        width="56"
+        height="56"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M20 6 9 17l-5-5"></path>
+      </svg>
+      <span class="done-text">{{ done() ? 'Done!' : 'Done' }}</span>
+    </button>
+    <p class="muted hint" aria-live="polite">{{ hint() }}</p>
+  </section>
+
+  <label class="note">
+    <span class="field-label">Note (optional)</span>
+    <textarea
+      class="text-field"
+      rows="4"
+      [value]="note()"
+      (input)="note.set($any($event.target).value)"
+      [attr.maxlength]="maxNoteLength"
+      placeholder="Jot down your thinking"
+    ></textarea>
+  </label>
+
+  @if (errorMessage()) {
+    <p class="error-text" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <button type="button" class="button-primary save" [disabled]="isSaving()" (click)="save()">
+    Save
+  </button>
+</main>
