@@ -9,4 +9,5 @@ export * from './domain-error';
 export * from './duration-format';
 export * from './local-date';
 export * from './note';
+export * from './timed-category';
 export * from './timer-cues';

@@ -26,7 +26,7 @@ export type ChallengeCategory = 'exercise' | CheckOffCategory;
 /** The fields every challenge has, whatever its kind. */
 interface ChallengeBase {
   readonly id: string;
-  /** Shown on Today, for example "Wall squat" or "Atomic Habits". */
+  /** Shown on Today, for example "Wall Squat" or "Atomic Habits". */
   readonly name: string;
   /** BR-01: Day 1 is the day the user pressed Start challenge. */
   readonly startDate: LocalDate;
@@ -61,7 +61,7 @@ export interface NewTimedChallengeInput {
   readonly id: string;
   readonly startDate: LocalDate;
   readonly targetSeconds: number;
-  /** Defaults to "Wall squat". */
+  /** Defaults to "Wall Squat". */
   readonly name?: string;
 }
 

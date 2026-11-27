@@ -5,7 +5,6 @@ import {
   requireAttemptDraft,
   requireCelebration,
   requireChallengeDay,
-  requireCheckOffCelebration,
   requireCheckOffDay,
 } from './presentation/state/route-guards';
 import { TabShell } from './presentation/shell/tab-shell';
@@ -24,19 +23,13 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'timer',
+    path: 'timer/:challengeId',
     canActivate: [requireChallengeDay],
     loadComponent: () => import('./presentation/pages/timer/timer-page').then((m) => m.TimerPage),
   },
   {
-    path: 'celebration',
-    canActivate: [requireCelebration],
-    loadComponent: () =>
-      import('./presentation/pages/celebration/celebration-page').then((m) => m.CelebrationPage),
-  },
-  {
     path: 'celebration/:challengeId',
-    canActivate: [requireCheckOffCelebration],
+    canActivate: [requireCelebration],
     loadComponent: () =>
       import('./presentation/pages/celebration/celebration-page').then((m) => m.CelebrationPage),
   },
@@ -57,7 +50,7 @@ export const routes: Routes = [
       import('./presentation/pages/settings/settings-page').then((m) => m.SettingsPage),
   },
   {
-    path: 'add-attempt',
+    path: 'add-attempt/:challengeId',
     canActivate: [requireChallengeDay],
     loadComponent: () =>
       import('./presentation/pages/add-attempt/add-attempt-page').then((m) => m.AddAttemptPage),

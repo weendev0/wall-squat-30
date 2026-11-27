@@ -17,7 +17,7 @@ interface CheckOffCell {
 
 /**
  * Screen 15: the 30-day grid of a Reading, Course or Study challenge (BR-14 to BR-18).
- * Shares its look with the wall squat Progress screen (same stylesheet).
+ * Shares its look with the timed Progress screen (same stylesheet).
  */
 @Component({
   selector: 'app-check-off-progress',

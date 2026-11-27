@@ -6,13 +6,14 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { formatDuration } from '../../../domain';
 import { SCREEN_WAKE_LOCK } from '../../../composition/provide-wall-squat';
 import { DurationPipe } from '../../shared/duration.pipe';
 import { ProgressRing } from '../../shared/progress-ring';
 import { AttemptDraftStore } from '../../state/attempt-draft-store';
 import { ChallengeStore } from '../../state/challenge-store';
+import { challengeIdOf } from '../../state/route-guards';
 import { HoldTimer } from '../../timer/hold-timer';
 
 /**
@@ -33,8 +34,10 @@ export class TimerPage implements OnInit, OnDestroy {
   private readonly wakeLock = inject(SCREEN_WAKE_LOCK);
   protected readonly timer = inject(HoldTimer);
 
-  // The route guard makes sure a challenge day exists before this screen opens.
-  private readonly overview = inject(ChallengeStore).overview()!;
+  // The route guard makes sure /timer/:challengeId is a running challenge with a day today.
+  private readonly overview = inject(ChallengeStore).find(
+    challengeIdOf(inject(ActivatedRoute).snapshot),
+  )!;
   protected readonly dayNumber = this.overview.todayDayNumber!;
   protected readonly targetSeconds = this.overview.challenge.targetSeconds;
   protected readonly challengeName = this.overview.challenge.name;
@@ -64,6 +67,7 @@ export class TimerPage implements OnInit, OnDestroy {
   protected stop(): void {
     const durationSeconds = this.timer.stop();
     this.drafts.set({
+      challengeId: this.overview.challenge.id,
       durationSeconds,
       dayNumber: this.dayNumber,
       targetSeconds: this.targetSeconds,

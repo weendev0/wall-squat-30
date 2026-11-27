@@ -22,23 +22,50 @@
   </section>
 
   @if (kind() === 'timed') {
-    @if (isWallSquatRunning) {
-      <p class="card muted">
-        A timed challenge is already running. You can start a new one after its day 30.
+    <section class="timed-category" aria-labelledby="timed-category-heading">
+      <h2 id="timed-category-heading" class="field-label">Category</h2>
+      <div class="categories">
+        @for (option of timedCategories(); track option.name) {
+          <button
+            type="button"
+            class="chip"
+            [attr.aria-pressed]="option.name === timedCategory()"
+            [disabled]="option.isRunning"
+            (click)="pickTimedCategory(option)"
+          >
+            {{ option.name }}
+            @if (option.isRunning) {
+              <span class="small">· running</span>
+            }
+          </button>
+        }
+        @if (!isAddingCategory()) {
+          <button type="button" class="chip add-category" (click)="isAddingCategory.set(true)">
+            + Add category
+          </button>
+        }
+      </div>
+      @if (isAddingCategory()) {
+        <div class="add-row">
+          <input
+            class="text-field"
+            aria-label="New category name"
+            [value]="newCategoryName()"
+            (input)="newCategoryName.set($any($event.target).value)"
+            (keydown.enter)="addCategory()"
+            [attr.maxlength]="maxNameLength"
+            placeholder="For example Plank"
+            autocomplete="off"
+          />
+          <button type="button" class="chip" (click)="addCategory()">Add</button>
+        </div>
+      }
+      <p class="muted small">
+        Categories you add stay here for next time. Each category runs one challenge at a time.
       </p>
-    } @else {
-      <label class="timed-name">
-        <span class="field-label">Name</span>
-        <input
-          class="text-field"
-          [value]="timedName()"
-          (input)="timedName.set($any($event.target).value)"
-          [attr.maxlength]="maxNameLength"
-          placeholder="For example Wall squat or Plank"
-          autocomplete="off"
-        />
-      </label>
+    </section>
 
+    @if (timedCategory() !== null) {
       <section class="card target" aria-labelledby="target-heading">
         <h2 id="target-heading" class="field-label">Daily target</h2>
 

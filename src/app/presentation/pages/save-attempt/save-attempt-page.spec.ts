@@ -5,14 +5,20 @@ import { openScreen, setUpApp } from '../../testing/screen-test-helpers';
 
 describe('Save attempt screen', () => {
   let fakes: ReturnType<typeof setUpApp>;
+  let challengeId: string;
 
   beforeEach(async () => {
     fakes = setUpApp('2026-11-16');
-    await TestBed.inject(StartChallengeUseCase).execute(60);
+    challengeId = (await TestBed.inject(StartChallengeUseCase).execute(60)).id;
   });
 
   function stoppedAt(durationSeconds: number): void {
-    TestBed.inject(AttemptDraftStore).set({ durationSeconds, dayNumber: 1, targetSeconds: 60 });
+    TestBed.inject(AttemptDraftStore).set({
+      challengeId,
+      durationSeconds,
+      dayNumber: 1,
+      targetSeconds: 60,
+    });
   }
 
   it('saves the hold with its feeling and note, then shows it on Today', async () => {
@@ -35,7 +41,7 @@ describe('Save attempt screen', () => {
       note: 'Felt strong',
     });
     expect(screen.currentUrl()).toBe('/today');
-    expect(screen.text()).toContain('Saved 1:04. New personal best!');
+    expect(screen.text()).toContain('Saved 1:04 for Wall Squat. New personal best!');
   });
 
   it('says how far a hold was from the target', async () => {
@@ -65,7 +71,7 @@ describe('Save attempt screen', () => {
 
     await screen.click('Try again');
     expect(fakes.sound.isUnlocked).toBe(true);
-    expect(screen.currentUrl()).toBe('/timer');
+    expect(screen.currentUrl()).toBe(`/timer/${challengeId}`);
   });
 
   it('cannot be opened without a stopped hold', async () => {

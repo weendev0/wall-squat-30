@@ -30,7 +30,7 @@ export interface ChallengeSessions {
 }
 
 /**
- * The full history for the All sessions screen: every wall squat challenge, newest first,
+ * The full history for the All sessions screen: every timed challenge, newest first,
  * with its attempts grouped by day. Nothing is filtered here; the screen does that.
  */
 export class GetSessionHistoryUseCase {

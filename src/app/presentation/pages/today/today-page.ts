@@ -1,13 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { CheckOffOverview } from '../../../application';
-import { formatDuration } from '../../../domain';
+import { CheckOffOverview, TimedOverview } from '../../../application';
+import { DayResult, formatDuration } from '../../../domain';
 import { CLOCK, SOUND_PLAYER } from '../../../composition/provide-wall-squat';
 import { ChallengeCard } from '../../shared/challenge-card';
 import { shortDateLabel } from '../../shared/date-label';
 import { DurationPipe } from '../../shared/duration.pipe';
-import { ChallengeStore } from '../../state/challenge-store';
+import { ChallengeStore, todayResult } from '../../state/challenge-store';
 import { CheckOffStore } from '../../state/check-off-store';
+
+/** A timed card, such as Wall Squat or Plank, ready to show. */
+interface TimedCard {
+  readonly overview: TimedOverview;
+  readonly today: DayResult;
+  readonly detail: string;
+}
 
 /** A Reading, Course or Study card, ready to show. */
 interface CheckOffCard {
@@ -18,8 +25,8 @@ interface CheckOffCard {
 }
 
 /**
- * Screens 1 and 12: every running challenge, each on its own card (BR-13).
- * The wall squat card starts the timer; a check-off card opens Check-in.
+ * Screens 1 and 12: every running challenge, each on its own card (BR-13, BR-16).
+ * A timed card starts its timer; a check-off card opens Check-in.
  */
 @Component({
   selector: 'app-today-page',
@@ -35,23 +42,21 @@ export class TodayPage {
   private readonly router = inject(Router);
 
   protected readonly dateLabel = shortDateLabel(inject(CLOCK).today());
-  protected readonly wallSquat = this.challengeStore.overview;
-  protected readonly wallSquatToday = this.challengeStore.today;
-  protected readonly savedNotice = this.challengeStore.savedNotice;
-
-  protected readonly wallSquatDetail = computed(() => {
-    const overview = this.wallSquat();
-    const today = this.wallSquatToday();
-    if (!overview || !today) {
-      return '';
+  protected readonly savedNotice = computed(() => {
+    const notice = this.challengeStore.savedNotice();
+    if (notice === null) {
+      return null;
     }
-    const target = `Target ${formatDuration(overview.challenge.targetSeconds)}`;
-    if (today.bestSeconds === null) {
-      return target;
-    }
-    const attempts = `${today.attemptCount} ${today.attemptCount === 1 ? 'attempt' : 'attempts'}`;
-    return `${target} · best today ${formatDuration(today.bestSeconds)} · ${attempts}`;
+    const challengeName = this.challengeStore.find(notice.challengeId)?.challenge.name ?? '';
+    return { ...notice, challengeName };
   });
+
+  protected readonly timedCards = computed<TimedCard[]>(() =>
+    this.challengeStore.active().flatMap((overview) => {
+      const today = todayResult(overview);
+      return today ? [{ overview, today, detail: timedDetail(overview, today) }] : [];
+    }),
+  );
 
   protected readonly checkOffCards = computed<CheckOffCard[]>(() =>
     this.checkOffStore.active().flatMap((overview) => {
@@ -67,22 +72,33 @@ export class TodayPage {
 
   /** "1 of 3 done today": every running challenge counts once. Empty when none is running. */
   protected readonly doneTodayLabel = computed(() => {
-    const wallSquatCount = this.wallSquatToday() ? 1 : 0;
-    const wallSquatDone = this.wallSquatToday()?.status === 'complete' ? 1 : 0;
-    const cards = this.checkOffCards();
-    const done = wallSquatDone + cards.filter((card) => card.isDoneToday).length;
-    const total = wallSquatCount + cards.length;
+    const timed = this.timedCards();
+    const checkOffs = this.checkOffCards();
+    const done =
+      timed.filter((card) => card.today.status === 'complete').length +
+      checkOffs.filter((card) => card.isDoneToday).length;
+    const total = timed.length + checkOffs.length;
     return total === 0 ? '' : `${done} of ${total} done today`;
   });
 
-  protected startHold(): void {
+  protected startHold(challengeId: string): void {
     // iOS only allows sound when it starts inside a tap, so unlock it here, before the timer.
     void this.sound.unlock();
     this.challengeStore.dismissSavedNotice();
-    void this.router.navigate(['/timer']);
+    void this.router.navigate(['/timer', challengeId]);
   }
 
   protected dismissNotice(): void {
     this.challengeStore.dismissSavedNotice();
   }
+}
+
+/** "Target 1:00 · best today 1:05 · 2 attempts" */
+function timedDetail(overview: TimedOverview, today: DayResult): string {
+  const target = `Target ${formatDuration(overview.challenge.targetSeconds)}`;
+  if (today.bestSeconds === null) {
+    return target;
+  }
+  const attempts = `${today.attemptCount} ${today.attemptCount === 1 ? 'attempt' : 'attempts'}`;
+  return `${target} · best today ${formatDuration(today.bestSeconds)} · ${attempts}`;
 }

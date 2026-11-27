@@ -31,27 +31,27 @@
         </dd>
       </div>
     </dl>
-  } @else if (wallSquat; as wallSquat) {
-    <p class="muted">You finished the Wall Squat Challenge. Your legs earned this one.</p>
+  } @else if (timed; as timed) {
+    <p class="muted">You finished the {{ timed.challenge.name }} challenge. You earned this one.</p>
 
     <dl class="stats">
       <div class="card stat">
         <dt class="field-label">Days complete</dt>
-        <dd>{{ wallSquat.progress.daysComplete }}/{{ challengeLength }}</dd>
+        <dd>{{ timed.progress.daysComplete }}/{{ challengeLength }}</dd>
       </div>
       <div class="card stat">
         <dt class="field-label">Best hold</dt>
-        <dd>{{ wallSquat.progress.bestHoldSeconds | duration }}</dd>
+        <dd>{{ timed.progress.bestHoldSeconds | duration }}</dd>
       </div>
       <div class="card stat">
         <dt class="field-label">Total time</dt>
-        <dd>{{ wallSquat.progress.totalSeconds | duration }}</dd>
+        <dd>{{ timed.progress.totalSeconds | duration }}</dd>
       </div>
       <div class="card stat">
         <dt class="field-label">Longest streak</dt>
         <dd>
-          {{ wallSquat.progress.longestStreak }}
-          {{ wallSquat.progress.longestStreak === 1 ? 'day' : 'days' }}
+          {{ timed.progress.longestStreak }}
+          {{ timed.progress.longestStreak === 1 ? 'day' : 'days' }}
         </dd>
       </div>
     </dl>

@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CHALLENGE_LENGTH_DAYS } from '../../../domain';
 import { DurationPipe } from '../../shared/duration.pipe';
 import { ChallengeStore } from '../../state/challenge-store';
 import { CheckOffStore } from '../../state/check-off-store';
+import { challengeIdOf } from '../../state/route-guards';
 
 /** A confetti piece: where it sits and how it looks. Fixed, so the screen looks the same every time. */
 interface ConfettiPiece {
@@ -18,9 +19,8 @@ const CONFETTI_COLORS = ['#E4572E', '#FFB39C', '#F5F4F0', '#FF8A66'];
 const CONFETTI_COUNT = 24;
 
 /**
- * Screen 11: shown once after day 30, with the final numbers of the challenge.
- * /celebration is for the wall squat (BR-10); /celebration/:challengeId for a
- * Reading, Course or Study challenge (BR-18).
+ * Screen 11: shown once after day 30, with the final numbers of the challenge:
+ * timed (BR-10) or Reading, Course or Study (BR-18).
  */
 @Component({
   selector: 'app-celebration-page',
@@ -34,16 +34,15 @@ export class CelebrationPage {
   private readonly checkOffStore = inject(CheckOffStore);
   private readonly router = inject(Router);
 
-  /** From /celebration/:challengeId; left out for the wall squat. */
-  readonly challengeId = input<string>();
+  /** From /celebration/:challengeId. */
+  readonly challengeId = input.required<string>();
 
-  // The route guards make sure a finished challenge is waiting for its celebration.
+  // The route guard makes sure a finished challenge is waiting for its celebration.
   // Kept as it was on arrival, so the numbers stay on screen while the buttons save.
-  protected readonly wallSquat = this.store.overview();
-  protected readonly checkOff = computed(() => {
-    const id = this.challengeId();
-    return id === undefined ? null : this.checkOffStore.find(id);
-  });
+  protected readonly timed = this.store.find(challengeIdOf(inject(ActivatedRoute).snapshot));
+  protected readonly checkOff = computed(() =>
+    this.timed ? null : this.checkOffStore.find(this.challengeId()),
+  );
   protected readonly challengeLength = CHALLENGE_LENGTH_DAYS;
   protected readonly confetti: readonly ConfettiPiece[] = Array.from(
     { length: CONFETTI_COUNT },
@@ -78,7 +77,7 @@ export class CelebrationPage {
     if (checkOff) {
       await this.checkOffStore.markCelebrationShown(checkOff.challenge.id);
     } else {
-      await this.store.markCelebrationShown();
+      await this.store.markCelebrationShown(this.challengeId());
     }
   }
 }
