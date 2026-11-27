@@ -1,0 +1,69 @@
+@if (overview(); as overview) {
+  <main class="screen screen-in-tabs">
+    <h1 class="screen-title">History</h1>
+
+    <section class="stats" aria-label="Totals">
+      <div class="card stat">
+        <span class="field-label">Total time</span>
+        <strong>{{ overview.progress.totalSeconds | duration }}</strong>
+      </div>
+      <div class="card stat">
+        <span class="field-label">Best hold</span>
+        <strong>{{ overview.progress.bestHoldSeconds | duration }}</strong>
+      </div>
+      <div class="card stat">
+        <span class="field-label">Average</span>
+        <strong>{{ overview.progress.averageSeconds | duration }}</strong>
+      </div>
+    </section>
+
+    <section class="card chart-card" aria-labelledby="chart-heading">
+      <div class="chart-header">
+        <h2 id="chart-heading" class="chart-title">Hold time per day</h2>
+        <span class="muted small"
+          >dashed line = {{ overview.challenge.targetSeconds | duration }} target</span
+        >
+      </div>
+      <div class="chart">
+        <div class="target-line" [style.bottom.%]="targetLine() * 100" aria-hidden="true"></div>
+        <ol class="bars">
+          @for (bar of bars(); track bar.dayNumber) {
+            <li class="bar-slot" [attr.aria-label]="bar.accessibleLabel">
+              <span class="bar" [class]="bar.status" [style.height.%]="bar.height * 100"></span>
+              <span class="bar-label" aria-hidden="true">{{ bar.dayNumber }}</span>
+            </li>
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section aria-labelledby="recent-heading">
+      <h2 id="recent-heading" class="field-label">Recent holds</h2>
+      @if (recent().length === 0) {
+        <p class="muted">No holds yet. Your attempts will show up here.</p>
+      } @else {
+        <ul class="card recent">
+          @for (row of recent(); track row.id) {
+            <li class="recent-row">
+              <span class="recent-text">
+                <strong>{{ row.title }}</strong>
+                @if (row.details) {
+                  <span class="muted small">{{ row.details }}</span>
+                }
+              </span>
+              <span class="recent-time">
+                @if (row.isMakeUp) {
+                  <span title="Make-up" aria-label="Make-up">↺</span>
+                }
+                @if (row.isManual) {
+                  <span title="Added by hand" aria-label="Added by hand">✎</span>
+                }
+                {{ row.durationSeconds | duration }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </main>
+}

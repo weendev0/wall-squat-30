@@ -16,34 +16,7 @@
       </button>
     </div>
 
-    <div class="fields">
-      <label>
-        <span class="field-label">Minutes</span>
-        <input
-          #minutesField
-          class="text-field"
-          type="number"
-          inputmode="numeric"
-          min="0"
-          max="10"
-          [value]="minutes()"
-          (change)="setFromFields(minutesField.value, secondsField.value)"
-        />
-      </label>
-      <label>
-        <span class="field-label">Seconds</span>
-        <input
-          #secondsField
-          class="text-field"
-          type="number"
-          inputmode="numeric"
-          min="0"
-          max="59"
-          [value]="seconds()"
-          (change)="setFromFields(minutesField.value, secondsField.value)"
-        />
-      </label>
-    </div>
+    <app-duration-fields [seconds]="targetSeconds()" (secondsChange)="setTarget($event)" />
 
     <div class="presets">
       @for (preset of presets; track preset) {

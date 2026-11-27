@@ -1,0 +1,100 @@
+@if (overview(); as overview) {
+  <main class="screen screen-in-tabs">
+    <p class="eyebrow muted-eyebrow">Challenge · started {{ startedLabel() }}</p>
+    <h1 class="screen-title">Progress</h1>
+
+    @if (today(); as today) {
+      @if (today.status === 'complete') {
+        <section class="today-result" aria-label="Today">
+          <span class="check" aria-hidden="true">✓</span>
+          <h2>Target hit. Day {{ today.dayNumber }} done.</h2>
+          <strong class="big-time">{{ today.bestSeconds | duration }}</strong>
+          @if (today.bestSeconds! > overview.challenge.targetSeconds) {
+            <span class="pill"
+              >+{{ today.bestSeconds! - overview.challenge.targetSeconds }}s over target</span
+            >
+          }
+        </section>
+      } @else if (today.status === 'under-target') {
+        <p class="card muted">
+          Day {{ today.dayNumber }}: best so far {{ today.bestSeconds | duration }},
+          {{ overview.challenge.targetSeconds - today.bestSeconds! }}s to the target.
+        </p>
+      }
+    }
+
+    <section class="card summary">
+      <div class="summary-row">
+        <strong class="summary-count"
+          >{{ overview.progress.daysComplete }} of {{ challengeLength }} days</strong
+        >
+        <span class="muted">{{ daysToGo() }} to go</span>
+      </div>
+      <div
+        class="bar"
+        role="progressbar"
+        [attr.aria-valuenow]="overview.progress.daysComplete"
+        aria-valuemin="0"
+        [attr.aria-valuemax]="challengeLength"
+      >
+        <div class="bar-fill" [style.width.%]="completedShare() * 100"></div>
+      </div>
+      <p class="muted small">
+        Current streak {{ overview.progress.currentStreak }}
+        {{ overview.progress.currentStreak === 1 ? 'day' : 'days' }} · {{ shortDayCount() }} short
+        {{ shortDayCount() === 1 ? 'day' : 'days' }} · {{ missedDayCount() }} missed
+      </p>
+    </section>
+
+    <ol class="grid" aria-label="The 30 days">
+      @for (cell of cells(); track cell.dayNumber) {
+        <li
+          class="cell"
+          [class]="cell.status"
+          [class.today]="cell.isToday"
+          [attr.aria-label]="cell.accessibleLabel"
+        >
+          <span class="cell-number">{{ cell.dayNumber }}</span>
+          <span class="cell-caption">{{ cell.caption }}</span>
+          @if (cell.isMadeUp) {
+            <span class="marker made-up" title="Made up later" aria-hidden="true">↺</span>
+          }
+          @if (cell.hasManualAttempt) {
+            <span class="marker manual" title="Added by hand" aria-hidden="true">✎</span>
+          }
+        </li>
+      }
+    </ol>
+
+    <ul class="legend" aria-label="Legend">
+      <li>
+        <span class="swatch complete"></span>Hit {{ overview.challenge.targetSeconds | duration }}
+      </li>
+      <li>
+        <span class="swatch under-target"></span>Under
+        {{ overview.challenge.targetSeconds | duration }}
+      </li>
+      <li><span class="swatch missed"></span>Missed</li>
+      <li><span class="swatch upcoming"></span>Upcoming</li>
+      <li><span aria-hidden="true">↺</span> Made up</li>
+      <li><span aria-hidden="true">✎</span> Added by hand</li>
+    </ul>
+
+    @if (makeUp(); as makeUp) {
+      <section class="card make-up">
+        <div>
+          <strong>{{ makeUp.reason }}</strong>
+          <p class="muted small">
+            Make it up any time. It counts toward your 30 days, not your streak.
+          </p>
+        </div>
+        <a
+          class="make-up-button"
+          routerLink="/add-attempt"
+          [queryParams]="{ day: makeUp.dayNumber }"
+          >Make up</a
+        >
+      </section>
+    }
+  </main>
+}

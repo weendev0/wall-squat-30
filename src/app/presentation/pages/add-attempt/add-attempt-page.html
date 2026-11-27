@@ -1,0 +1,63 @@
+<main class="screen">
+  <header class="top-bar">
+    <button type="button" class="button-quiet" (click)="cancel()">Cancel</button>
+    <h1 class="top-title">Add attempt</h1>
+    <button type="button" class="button-quiet save" [disabled]="isSaving()" (click)="save()">
+      Save
+    </button>
+  </header>
+
+  <section>
+    <h2 class="field-label" id="day-heading">Which day</h2>
+    <div class="card day-list" role="radiogroup" aria-labelledby="day-heading">
+      @for (option of dayOptions; track option.dayNumber) {
+        <button
+          type="button"
+          class="day-option"
+          role="radio"
+          [attr.aria-checked]="option.dayNumber === selectedDay()"
+          (click)="selectedDay.set(option.dayNumber)"
+        >
+          <span class="radio" aria-hidden="true"></span>
+          <span class="day-text">
+            <strong>{{ option.title }}</strong>
+            <span class="muted small">{{ option.subtitle }}</span>
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2 class="field-label">How long you held it</h2>
+    <app-duration-fields
+      [seconds]="durationSeconds()"
+      (secondsChange)="durationSeconds.set($event)"
+    />
+  </section>
+
+  <section>
+    <h2 class="field-label" id="feeling-heading">How did it feel? (optional)</h2>
+    <div class="feelings" role="group" aria-labelledby="feeling-heading">
+      @for (option of feelings; track option.value) {
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="feeling() === option.value"
+          (click)="toggleFeeling(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (errorMessage()) {
+    <p class="error-text" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <p class="muted small">
+    Shown with a pencil icon. A past day you add to counts as a make-up: it counts toward your 30
+    days, not your streak.
+  </p>
+</main>

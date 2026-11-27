@@ -1,0 +1,121 @@
+.small {
+  font-size: 13px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stat strong {
+  font-size: 20px;
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.chart {
+  position: relative;
+  height: 160px;
+  padding-bottom: 16px; // room for the day numbers
+}
+
+.target-line {
+  position: absolute;
+  inset-inline: 0;
+  margin-bottom: 16px;
+  border-top: 1.5px dashed var(--color-text-secondary);
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bar-slot {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  height: 100%;
+  max-width: 24px;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--color-missed);
+
+  &.complete {
+    background: var(--color-accent);
+  }
+
+  &.under-target {
+    background: var(--color-accent-muted);
+  }
+}
+
+.bar-label {
+  position: absolute;
+  bottom: -16px;
+  width: 100%;
+  color: var(--color-text-secondary);
+  font-size: 9px;
+  text-align: center;
+}
+
+.recent {
+  margin: 0;
+  padding: 0 16px;
+  list-style: none;
+}
+
+.recent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.recent-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recent-time {
+  display: flex;
+  gap: 6px;
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

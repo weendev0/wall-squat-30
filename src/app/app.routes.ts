@@ -26,6 +26,12 @@ export const routes: Routes = [
     loadComponent: () => import('./presentation/pages/timer/timer-page').then((m) => m.TimerPage),
   },
   {
+    path: 'add-attempt',
+    canActivate: [requireChallengeDay],
+    loadComponent: () =>
+      import('./presentation/pages/add-attempt/add-attempt-page').then((m) => m.AddAttemptPage),
+  },
+  {
     path: 'save-attempt',
     canActivate: [requireAttemptDraft],
     loadComponent: () =>
@@ -43,15 +49,13 @@ export const routes: Routes = [
       },
       {
         path: 'progress',
-        data: { screenTitle: 'Progress' },
         loadComponent: () =>
-          import('./presentation/pages/coming-soon/coming-soon-page').then((m) => m.ComingSoonPage),
+          import('./presentation/pages/progress/progress-page').then((m) => m.ProgressPage),
       },
       {
         path: 'history',
-        data: { screenTitle: 'History' },
         loadComponent: () =>
-          import('./presentation/pages/coming-soon/coming-soon-page').then((m) => m.ComingSoonPage),
+          import('./presentation/pages/history/history-page').then((m) => m.HistoryPage),
       },
       { path: '', pathMatch: 'full', redirectTo: 'today' },
     ],

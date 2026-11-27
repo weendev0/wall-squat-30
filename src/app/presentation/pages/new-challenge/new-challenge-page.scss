@@ -16,12 +16,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
 .presets {
   display: flex;
   flex-wrap: wrap;
