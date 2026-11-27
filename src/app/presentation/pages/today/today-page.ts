@@ -65,13 +65,14 @@ export class TodayPage {
     }),
   );
 
-  /** "1 of 3 done today": every running challenge counts once. */
+  /** "1 of 3 done today": every running challenge counts once. Empty when none is running. */
   protected readonly doneTodayLabel = computed(() => {
     const wallSquatCount = this.wallSquatToday() ? 1 : 0;
     const wallSquatDone = this.wallSquatToday()?.status === 'complete' ? 1 : 0;
     const cards = this.checkOffCards();
     const done = wallSquatDone + cards.filter((card) => card.isDoneToday).length;
-    return `${done} of ${wallSquatCount + cards.length} done today`;
+    const total = wallSquatCount + cards.length;
+    return total === 0 ? '' : `${done} of ${total} done today`;
   });
 
   protected startHold(): void {

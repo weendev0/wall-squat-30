@@ -54,6 +54,6 @@ describe('Celebration screen', () => {
 
     await screen.harness.navigateByUrl('/celebration');
 
-    expect(screen.currentUrl()).toBe('/new-challenge');
+    expect(screen.currentUrl()).toBe('/today');
   });
 });

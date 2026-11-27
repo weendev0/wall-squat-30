@@ -58,8 +58,6 @@ export class NewChallengePage {
   /** Only one wall squat runs at a time, so Timed is closed while one is running. */
   protected readonly isWallSquatRunning =
     this.challengeStore.overview()?.challenge.status === 'active';
-  protected readonly hasAnyChallenge =
-    this.isWallSquatRunning || this.checkOffStore.active().length > 0;
 
   protected readonly kind = signal<ChallengeKind>(this.isWallSquatRunning ? 'checkoff' : 'timed');
   protected readonly targetSeconds = signal(DEFAULT_TARGET_SECONDS);
