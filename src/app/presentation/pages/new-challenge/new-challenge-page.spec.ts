@@ -44,9 +44,33 @@ describe('New challenge screen', () => {
     expect(screen.currentUrl()).toBe('/today');
   });
 
+  it('names a timed challenge "Wall squat" unless another name is typed', async () => {
+    const screen = await openScreen('/new-challenge');
+    const name = timedNameField(screen);
+    expect(name.value).toBe('Wall squat');
+
+    await typeName(screen, name, '  Plank  ');
+    await screen.click('Start challenge');
+
+    const [challenge] = await fakes.challenges.findAll();
+    expect(challenge).toMatchObject({ kind: 'timed', name: 'Plank' });
+    expect(screen.text()).toContain('Plank');
+  });
+
+  it('needs a name before a timed challenge can start', async () => {
+    const screen = await openScreen('/new-challenge');
+
+    await typeName(screen, timedNameField(screen), '   ');
+
+    expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it('takes a target typed as minutes and seconds', async () => {
     const screen = await openScreen('/new-challenge');
-    const [minutes, seconds] = screen.harness.routeNativeElement!.querySelectorAll('input');
+    const [minutes, seconds] =
+      screen.harness.routeNativeElement!.querySelectorAll<HTMLInputElement>(
+        'app-duration-fields input',
+      );
 
     minutes.value = '2';
     seconds.value = '15';
@@ -67,7 +91,7 @@ describe('New challenge screen', () => {
     ).toBe('true');
 
     await screen.click('Timed Hold for a target time, like the wall squat');
-    expect(screen.text()).toContain('A wall squat challenge is already running.');
+    expect(screen.text()).toContain('A timed challenge is already running.');
     expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
   });
 
@@ -94,3 +118,15 @@ describe('New challenge screen', () => {
     expect(screen.text()).toContain('Angular signals');
   });
 });
+
+type Screen = Awaited<ReturnType<typeof openScreen>>;
+
+function timedNameField(screen: Screen): HTMLInputElement {
+  return screen.harness.routeNativeElement!.querySelector('.timed-name input')!;
+}
+
+async function typeName(screen: Screen, field: HTMLInputElement, text: string): Promise<void> {
+  field.value = text;
+  field.dispatchEvent(new Event('input'));
+  await screen.harness.fixture.whenStable();
+}

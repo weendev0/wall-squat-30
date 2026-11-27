@@ -37,6 +37,7 @@ export class TimerPage implements OnInit, OnDestroy {
   private readonly overview = inject(ChallengeStore).overview()!;
   protected readonly dayNumber = this.overview.todayDayNumber!;
   protected readonly targetSeconds = this.overview.challenge.targetSeconds;
+  protected readonly challengeName = this.overview.challenge.name;
 
   protected readonly ringProgress = computed(
     () => this.timer.elapsedSeconds() / this.targetSeconds,

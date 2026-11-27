@@ -1,6 +1,7 @@
 import {
   createTimedChallenge,
   DEFAULT_TARGET_SECONDS,
+  WALL_SQUAT_NAME,
   DomainError,
   TimedChallenge,
 } from '../../domain';
@@ -18,11 +19,14 @@ export class StartChallengeUseCase {
     private readonly ids: IdGenerator,
   ) {}
 
-  async execute(targetSeconds: number = DEFAULT_TARGET_SECONDS): Promise<TimedChallenge> {
+  async execute(
+    targetSeconds: number = DEFAULT_TARGET_SECONDS,
+    name: string = WALL_SQUAT_NAME,
+  ): Promise<TimedChallenge> {
     const active = await findActiveTimedChallenge(this.challenges);
     if (active !== null) {
       throw new DomainError(
-        'A wall squat challenge is already running. Finish it before starting a new one.',
+        'A timed challenge is already running. Finish it before starting a new one.',
       );
     }
 
@@ -30,6 +34,7 @@ export class StartChallengeUseCase {
       id: this.ids.newId(),
       startDate: this.clock.today(),
       targetSeconds,
+      name,
     });
     await this.challenges.save(challenge);
     return challenge;

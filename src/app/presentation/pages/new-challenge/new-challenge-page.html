@@ -24,9 +24,21 @@
   @if (kind() === 'timed') {
     @if (isWallSquatRunning) {
       <p class="card muted">
-        A wall squat challenge is already running. You can start a new one after its day 30.
+        A timed challenge is already running. You can start a new one after its day 30.
       </p>
     } @else {
+      <label class="timed-name">
+        <span class="field-label">Name</span>
+        <input
+          class="text-field"
+          [value]="timedName()"
+          (input)="timedName.set($any($event.target).value)"
+          [attr.maxlength]="maxNameLength"
+          placeholder="For example Wall squat or Plank"
+          autocomplete="off"
+        />
+      </label>
+
       <section class="card target" aria-labelledby="target-heading">
         <h2 id="target-heading" class="field-label">Daily target</h2>
 
