@@ -2,8 +2,8 @@ import { Challenge } from '../../domain';
 
 /** Stores challenges. The application layer only knows this interface, not IndexedDB. */
 export interface ChallengeRepository {
-  /** The one active challenge, or null when there is none. */
-  findActive(): Promise<Challenge | null>;
+  /** BR-13: every challenge that is still running, of any kind. */
+  findAllActive(): Promise<Challenge[]>;
   findById(id: string): Promise<Challenge | null>;
   /** Every challenge, newest start date first. */
   findAll(): Promise<Challenge[]>;

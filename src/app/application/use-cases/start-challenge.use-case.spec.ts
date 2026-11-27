@@ -9,7 +9,7 @@ describe('StartChallengeUseCase', () => {
 
     expect(challenge.startDate).toBe('2026-11-27');
     expect(challenge.targetSeconds).toBe(60);
-    expect(await app.challenges.findActive()).toEqual(challenge);
+    expect(await app.challenges.findById(challenge.id)).toEqual(challenge);
   });
 
   it('accepts another target, set to the second', async () => {
@@ -17,7 +17,14 @@ describe('StartChallengeUseCase', () => {
     expect((await app.startChallenge.execute(75)).targetSeconds).toBe(75);
   });
 
-  it('refuses a second challenge while one is running', async () => {
+  it('starts beside a running check-off challenge (BR-13)', async () => {
+    const app = createTestApp();
+    await app.startCheckOffChallenge.execute({ name: 'Atomic Habits', category: 'reading' });
+
+    await expect(app.startChallenge.execute()).resolves.toMatchObject({ kind: 'timed' });
+  });
+
+  it('refuses a second wall squat challenge while one is running', async () => {
     const app = createTestApp();
     await app.startChallenge.execute();
 

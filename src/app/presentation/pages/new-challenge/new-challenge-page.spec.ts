@@ -34,7 +34,7 @@ describe('New challenge screen', () => {
     await screen.click('Start challenge');
 
     const [challenge] = await fakes.challenges.findAll();
-    expect(challenge.targetSeconds).toBe(55);
+    expect(challenge).toMatchObject({ kind: 'timed', targetSeconds: 55 });
     expect(challenge.startDate).toBe('2026-11-27');
     expect(screen.currentUrl()).toBe('/today');
   });

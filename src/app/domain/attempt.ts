@@ -1,7 +1,8 @@
 import { MAX_ATTEMPT_SECONDS, MIN_ATTEMPT_SECONDS } from './challenge-rules.constants';
-import { Challenge, dateOfDay, dayNumberOn } from './challenge';
+import { isMakeUpDay, TimedChallenge } from './challenge';
 import { DomainError } from './domain-error';
-import { assertLocalDate, LocalDate } from './local-date';
+import { LocalDate } from './local-date';
+import { cleanNote } from './note';
 
 /** How the attempt was recorded: with the timer, or typed in by hand (BR-08). */
 export type AttemptSource = 'timer' | 'manual';
@@ -26,7 +27,7 @@ export interface Attempt {
 
 export interface NewAttemptInput {
   readonly id: string;
-  readonly challenge: Challenge;
+  readonly challenge: TimedChallenge;
   readonly dayNumber: number;
   readonly recordedOn: LocalDate;
   readonly durationSeconds: number;
@@ -50,15 +51,8 @@ export function isTooShortToKeep(durationSeconds: number): boolean {
  * - an attempt can never be for a day in the future
  */
 export function createAttempt(input: NewAttemptInput): Attempt {
-  assertLocalDate(input.recordedOn);
   assertValidDuration(input.durationSeconds);
-
-  const dayDate = dateOfDay(input.challenge, input.dayNumber);
-  const todayNumber = dayNumberOn(input.challenge, input.recordedOn);
-  const isFutureDay = dayDate > input.recordedOn;
-  if (isFutureDay || todayNumber === null) {
-    throw new DomainError('You can only add attempts for today or earlier challenge days.');
-  }
+  const isMakeUp = isMakeUpDay(input.challenge, input.dayNumber, input.recordedOn);
 
   return {
     id: input.id,
@@ -67,9 +61,9 @@ export function createAttempt(input: NewAttemptInput): Attempt {
     recordedOn: input.recordedOn,
     durationSeconds: input.durationSeconds,
     source: input.source,
-    isMakeUp: dayDate < input.recordedOn,
+    isMakeUp,
     feeling: input.feeling ?? 'none',
-    note: (input.note ?? '').trim(),
+    note: cleanNote(input.note),
   };
 }
 

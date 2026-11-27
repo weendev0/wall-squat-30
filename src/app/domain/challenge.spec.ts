@@ -1,13 +1,17 @@
 import {
   completeChallenge,
-  createChallenge,
+  createCheckOffChallenge,
+  createTimedChallenge,
   dateOfDay,
   dayNumberOn,
   hasChallengeEnded,
+  isCheckOffChallenge,
+  isMakeUpDay,
+  isTimedChallenge,
   markCelebrationShown,
 } from './challenge';
 import { DomainError } from './domain-error';
-import { aChallenge, START_DATE } from './testing/domain-builders';
+import { aChallenge, aCheckOffChallenge, START_DATE } from './testing/domain-builders';
 
 describe('challenge', () => {
   describe('BR-01: 30 calendar days from the start day', () => {
@@ -35,15 +39,19 @@ describe('challenge', () => {
 
   describe('BR-02: target fixed per challenge', () => {
     it('starts active with the chosen target', () => {
-      const challenge = createChallenge({ id: 'c1', startDate: START_DATE, targetSeconds: 75 });
+      const challenge = createTimedChallenge({
+        id: 'c1',
+        startDate: START_DATE,
+        targetSeconds: 75,
+      });
       expect(challenge.status).toBe('active');
       expect(challenge.targetSeconds).toBe(75);
     });
 
     it.each([0, 4, 601, 60.5])('rejects a target of %d seconds', (targetSeconds) => {
-      expect(() => createChallenge({ id: 'c1', startDate: START_DATE, targetSeconds })).toThrow(
-        DomainError,
-      );
+      expect(() =>
+        createTimedChallenge({ id: 'c1', startDate: START_DATE, targetSeconds }),
+      ).toThrow(DomainError);
     });
   });
 
@@ -68,6 +76,61 @@ describe('challenge', () => {
 
     it('remembers that the celebration was shown', () => {
       expect(markCelebrationShown(challenge).celebrationShown).toBe(true);
+    });
+  });
+
+  describe('BR-13: two kinds of challenge', () => {
+    it('makes a timed challenge an exercise called Wall squat by default', () => {
+      const challenge = aChallenge();
+
+      expect(challenge).toMatchObject({ kind: 'timed', category: 'exercise', name: 'Wall squat' });
+      expect(isTimedChallenge(challenge)).toBe(true);
+      expect(isCheckOffChallenge(challenge)).toBe(false);
+    });
+
+    it('makes a check-off challenge with its own name and category', () => {
+      const challenge = createCheckOffChallenge({
+        id: 'r1',
+        startDate: START_DATE,
+        name: '  Atomic Habits ',
+        category: 'reading',
+      });
+
+      expect(challenge).toMatchObject({
+        kind: 'checkoff',
+        category: 'reading',
+        name: 'Atomic Habits',
+        status: 'active',
+      });
+      expect(isCheckOffChallenge(challenge)).toBe(true);
+    });
+
+    it.each(['', '   ', 'x'.repeat(41)])('rejects the name "%s"', (name) => {
+      expect(() =>
+        createCheckOffChallenge({ id: 'r1', startDate: START_DATE, name, category: 'study' }),
+      ).toThrow(DomainError);
+    });
+
+    it('keeps the kind when the challenge is completed', () => {
+      const completed = completeChallenge(aCheckOffChallenge(), '2026-12-16');
+      expect(completed.kind).toBe('checkoff');
+    });
+  });
+
+  describe('BR-07 and BR-17: which days can be recorded', () => {
+    const challenge = aCheckOffChallenge(); // Day 1 = 16 Nov
+
+    it('records today as a normal day', () => {
+      expect(isMakeUpDay(challenge, 12, '2026-11-27')).toBe(false);
+    });
+
+    it('records an earlier day as a make-up', () => {
+      expect(isMakeUpDay(challenge, 3, '2026-11-27')).toBe(true);
+    });
+
+    it('refuses a future day and any day after the challenge', () => {
+      expect(() => isMakeUpDay(challenge, 13, '2026-11-27')).toThrow(DomainError);
+      expect(() => isMakeUpDay(challenge, 3, '2026-12-16')).toThrow(DomainError);
     });
   });
 });

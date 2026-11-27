@@ -1,7 +1,16 @@
-import { Challenge, createChallenge, DEFAULT_TARGET_SECONDS, DomainError } from '../../domain';
+import {
+  createTimedChallenge,
+  DEFAULT_TARGET_SECONDS,
+  DomainError,
+  TimedChallenge,
+} from '../../domain';
 import { ChallengeRepository, Clock, IdGenerator } from '../ports';
+import { findActiveTimedChallenge } from './find-active-timed-challenge';
 
-/** BR-01, BR-02: starts a new 30-day challenge today with the chosen daily target. */
+/**
+ * BR-01, BR-02: starts a new 30-day wall squat challenge today with the chosen daily target.
+ * Check-off challenges may run beside it (BR-13), but only one timed challenge at a time.
+ */
 export class StartChallengeUseCase {
   constructor(
     private readonly challenges: ChallengeRepository,
@@ -9,13 +18,15 @@ export class StartChallengeUseCase {
     private readonly ids: IdGenerator,
   ) {}
 
-  async execute(targetSeconds: number = DEFAULT_TARGET_SECONDS): Promise<Challenge> {
-    const active = await this.challenges.findActive();
+  async execute(targetSeconds: number = DEFAULT_TARGET_SECONDS): Promise<TimedChallenge> {
+    const active = await findActiveTimedChallenge(this.challenges);
     if (active !== null) {
-      throw new DomainError('A challenge is already running. Finish it before starting a new one.');
+      throw new DomainError(
+        'A wall squat challenge is already running. Finish it before starting a new one.',
+      );
     }
 
-    const challenge = createChallenge({
+    const challenge = createTimedChallenge({
       id: this.ids.newId(),
       startDate: this.clock.today(),
       targetSeconds,

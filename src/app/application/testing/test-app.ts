@@ -1,3 +1,4 @@
+import { CheckInUseCase } from '../use-cases/check-in.use-case';
 import { DeleteAttemptUseCase } from '../use-cases/delete-attempt.use-case';
 import { ExportHistoryCsvUseCase } from '../use-cases/export-history-csv.use-case';
 import { GetChallengeOverviewUseCase } from '../use-cases/get-challenge-overview.use-case';
@@ -6,10 +7,13 @@ import { MarkCelebrationShownUseCase } from '../use-cases/mark-celebration-shown
 import { RecordAttemptUseCase } from '../use-cases/record-attempt.use-case';
 import { ResetHistoryUseCase } from '../use-cases/reset-history.use-case';
 import { StartChallengeUseCase } from '../use-cases/start-challenge.use-case';
+import { StartCheckOffChallengeUseCase } from '../use-cases/start-check-off-challenge.use-case';
+import { UndoCheckInUseCase } from '../use-cases/undo-check-in.use-case';
 import {
   FakeClock,
   InMemoryAttemptRepository,
   InMemoryChallengeRepository,
+  InMemoryCheckInRepository,
   SequentialIdGenerator,
 } from './fakes';
 
@@ -17,20 +21,25 @@ import {
 export function createTestApp(startDate = '2026-11-16') {
   const challenges = new InMemoryChallengeRepository();
   const attempts = new InMemoryAttemptRepository();
+  const checkIns = new InMemoryCheckInRepository();
   const clock = new FakeClock(startDate);
   const ids = new SequentialIdGenerator();
 
   return {
     challenges,
     attempts,
+    checkIns,
     clock,
     startChallenge: new StartChallengeUseCase(challenges, clock, ids),
+    startCheckOffChallenge: new StartCheckOffChallengeUseCase(challenges, clock, ids),
+    checkIn: new CheckInUseCase(challenges, checkIns, clock, ids),
+    undoCheckIn: new UndoCheckInUseCase(challenges, checkIns),
     getOverview: new GetChallengeOverviewUseCase(challenges, attempts, clock),
     getSessionHistory: new GetSessionHistoryUseCase(challenges, attempts, clock),
     recordAttempt: new RecordAttemptUseCase(challenges, attempts, clock, ids),
     deleteAttempt: new DeleteAttemptUseCase(attempts),
     markCelebrationShown: new MarkCelebrationShownUseCase(challenges),
-    resetHistory: new ResetHistoryUseCase(challenges, attempts),
+    resetHistory: new ResetHistoryUseCase(challenges, attempts, checkIns),
     exportCsv: new ExportHistoryCsvUseCase(challenges, attempts),
   };
 }

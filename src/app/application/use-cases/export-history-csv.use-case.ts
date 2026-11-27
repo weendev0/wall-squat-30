@@ -1,4 +1,4 @@
-import { Attempt, Challenge, dateOfDay, formatDuration } from '../../domain';
+import { Attempt, dateOfDay, formatDuration, isTimedChallenge, TimedChallenge } from '../../domain';
 import { AttemptRepository, ChallengeRepository } from '../ports';
 
 const CSV_HEADER = [
@@ -28,7 +28,9 @@ export class ExportHistoryCsvUseCase {
   async execute(): Promise<string> {
     const challenges = await this.challenges.findAll();
     const attempts = await this.attempts.findAll();
-    const challengeById = new Map(challenges.map((challenge) => [challenge.id, challenge]));
+    const challengeById = new Map(
+      challenges.filter(isTimedChallenge).map((challenge) => [challenge.id, challenge]),
+    );
 
     const rows = attempts
       .flatMap((attempt) => {
@@ -42,7 +44,7 @@ export class ExportHistoryCsvUseCase {
   }
 }
 
-type AttemptWithChallenge = { attempt: Attempt; challenge: Challenge };
+type AttemptWithChallenge = { attempt: Attempt; challenge: TimedChallenge };
 
 function byChallengeThenDay(a: AttemptWithChallenge, b: AttemptWithChallenge): number {
   return (
@@ -52,7 +54,7 @@ function byChallengeThenDay(a: AttemptWithChallenge, b: AttemptWithChallenge): n
   );
 }
 
-function toRow(attempt: Attempt, challenge: Challenge): string[] {
+function toRow(attempt: Attempt, challenge: TimedChallenge): string[] {
   return [
     challenge.startDate,
     formatDuration(challenge.targetSeconds),

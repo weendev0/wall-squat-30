@@ -6,11 +6,13 @@ import {
   FakeSoundPlayer,
   InMemoryAttemptRepository,
   InMemoryChallengeRepository,
+  InMemoryCheckInRepository,
   SequentialIdGenerator,
 } from '../../application/testing/fakes';
 import {
   ATTEMPT_REPOSITORY,
   CHALLENGE_REPOSITORY,
+  CHECK_IN_REPOSITORY,
   CLOCK,
   FILE_SHARER,
   ID_GENERATOR,
@@ -28,6 +30,7 @@ export function provideWallSquatTesting(today = '2026-11-16') {
   const fakes = {
     challenges: new InMemoryChallengeRepository(),
     attempts: new InMemoryAttemptRepository(),
+    checkIns: new InMemoryCheckInRepository(),
     clock: new FakeClock(today),
     ids: new SequentialIdGenerator(),
     sound: new FakeSoundPlayer(),
@@ -39,6 +42,7 @@ export function provideWallSquatTesting(today = '2026-11-16') {
     provideWallSquat(),
     { provide: CHALLENGE_REPOSITORY, useValue: fakes.challenges },
     { provide: ATTEMPT_REPOSITORY, useValue: fakes.attempts },
+    { provide: CHECK_IN_REPOSITORY, useValue: fakes.checkIns },
     { provide: CLOCK, useValue: fakes.clock },
     { provide: ID_GENERATOR, useValue: fakes.ids },
     { provide: SOUND_PLAYER, useValue: fakes.sound },

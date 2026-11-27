@@ -2,18 +2,20 @@ import {
   Attempt,
   buildDayResults,
   calculateProgress,
-  Challenge,
   ChallengeProgress,
   completeChallenge,
   DayResult,
   dayNumberOn,
   hasChallengeEnded,
+  isTimedChallenge,
+  TimedChallenge,
 } from '../../domain';
 import { AttemptRepository, ChallengeRepository, Clock } from '../ports';
+import { findActiveTimedChallenge } from './find-active-timed-challenge';
 
 /** Everything the Today, Progress and Celebration screens need, in one object. */
 export interface ChallengeOverview {
-  readonly challenge: Challenge;
+  readonly challenge: TimedChallenge;
   readonly days: readonly DayResult[];
   readonly progress: ChallengeProgress;
   readonly attempts: readonly Attempt[];
@@ -24,7 +26,7 @@ export interface ChallengeOverview {
 }
 
 /**
- * Loads the current challenge with its calculated days and totals.
+ * Loads the current wall squat challenge with its calculated days and totals.
  * Returns null when there is nothing to show, so the app opens New challenge.
  * BR-10: a challenge past day 30 is completed here, the first time the app opens after it.
  */
@@ -57,8 +59,8 @@ export class GetChallengeOverviewUseCase {
   }
 
   /** The active challenge, or a just-finished one that still owes its celebration. */
-  private async findChallengeToShow(today: string): Promise<Challenge | null> {
-    const active = await this.challenges.findActive();
+  private async findChallengeToShow(today: string): Promise<TimedChallenge | null> {
+    const active = await findActiveTimedChallenge(this.challenges);
     if (active !== null) {
       if (!hasChallengeEnded(active, today)) {
         return active;
@@ -69,6 +71,6 @@ export class GetChallengeOverviewUseCase {
     }
 
     const all = await this.challenges.findAll();
-    return all.find((challenge) => !challenge.celebrationShown) ?? null;
+    return all.filter(isTimedChallenge).find((challenge) => !challenge.celebrationShown) ?? null;
   }
 }

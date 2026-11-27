@@ -6,9 +6,8 @@ import { WallSquatDatabase } from './wall-squat-database';
 export class DexieChallengeRepository implements ChallengeRepository {
   constructor(private readonly database: WallSquatDatabase) {}
 
-  async findActive(): Promise<Challenge | null> {
-    const active = await this.database.challenges.where('status').equals('active').first();
-    return active ?? null;
+  async findAllActive(): Promise<Challenge[]> {
+    return this.database.challenges.where('status').equals('active').toArray();
   }
 
   async findById(id: string): Promise<Challenge | null> {

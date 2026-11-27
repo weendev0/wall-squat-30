@@ -1,7 +1,8 @@
-import { Attempt, Challenge, CountdownCue, LocalDate, TimerCue } from '../../domain';
+import { Attempt, Challenge, CheckIn, CountdownCue, LocalDate, TimerCue } from '../../domain';
 import {
   AttemptRepository,
   ChallengeRepository,
+  CheckInRepository,
   Clock,
   FileSharer,
   IdGenerator,
@@ -15,8 +16,8 @@ import {
 export class InMemoryChallengeRepository implements ChallengeRepository {
   readonly items = new Map<string, Challenge>();
 
-  async findActive(): Promise<Challenge | null> {
-    return [...this.items.values()].find((challenge) => challenge.status === 'active') ?? null;
+  async findAllActive(): Promise<Challenge[]> {
+    return [...this.items.values()].filter((challenge) => challenge.status === 'active');
   }
 
   async findById(id: string): Promise<Challenge | null> {
@@ -53,6 +54,35 @@ export class InMemoryAttemptRepository implements AttemptRepository {
 
   async save(attempt: Attempt): Promise<void> {
     this.items.set(attempt.id, attempt);
+  }
+
+  async delete(id: string): Promise<void> {
+    this.items.delete(id);
+  }
+
+  async deleteAll(): Promise<void> {
+    this.items.clear();
+  }
+}
+
+export class InMemoryCheckInRepository implements CheckInRepository {
+  readonly items = new Map<string, CheckIn>();
+
+  async findByChallenge(challengeId: string): Promise<CheckIn[]> {
+    return [...this.items.values()].filter((checkIn) => checkIn.challengeId === challengeId);
+  }
+
+  async findByDay(challengeId: string, dayNumber: number): Promise<CheckIn | null> {
+    const ofChallenge = await this.findByChallenge(challengeId);
+    return ofChallenge.find((checkIn) => checkIn.dayNumber === dayNumber) ?? null;
+  }
+
+  async findAll(): Promise<CheckIn[]> {
+    return [...this.items.values()];
+  }
+
+  async save(checkIn: CheckIn): Promise<void> {
+    this.items.set(checkIn.id, checkIn);
   }
 
   async delete(id: string): Promise<void> {
