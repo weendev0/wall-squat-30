@@ -62,10 +62,11 @@ describe('Today screen', () => {
 
     await screen.click('Progress');
     expect(screen.currentUrl()).toBe('/progress');
-    expect(screen.text()).toContain('This screen is coming in the next update.');
+    expect(screen.text()).toContain('0 of 30 days');
 
     await screen.click('History');
     expect(screen.currentUrl()).toBe('/history');
+    expect(screen.text()).toContain('Hold time per day');
   });
 
   it('closes the saved message', async () => {

@@ -3,13 +3,9 @@ import { Router } from '@angular/router';
 import { DomainError, Feeling, isTooShortToKeep, MIN_ATTEMPT_SECONDS } from '../../../domain';
 import { SOUND_PLAYER } from '../../../composition/provide-wall-squat';
 import { DurationPipe } from '../../shared/duration.pipe';
+import { FEELING_OPTIONS } from '../../shared/feelings';
 import { AttemptDraftStore } from '../../state/attempt-draft-store';
 import { ChallengeStore } from '../../state/challenge-store';
-
-interface FeelingOption {
-  readonly value: Feeling;
-  readonly label: string;
-}
 
 /**
  * Screen 3: after Stop. The user saves or discards the hold (BR-05).
@@ -34,11 +30,7 @@ export class SaveAttemptPage {
   protected readonly reachedTarget = this.draft.durationSeconds >= this.draft.targetSeconds;
   protected readonly minimumSeconds = MIN_ATTEMPT_SECONDS;
 
-  protected readonly feelings: readonly FeelingOption[] = [
-    { value: 'easy', label: 'Easy' },
-    { value: 'solid', label: 'Solid' },
-    { value: 'tough', label: 'Tough' },
-  ];
+  protected readonly feelings = FEELING_OPTIONS;
   protected readonly feeling = signal<Feeling>('none');
   protected readonly note = signal('');
   protected readonly isSaving = signal(false);

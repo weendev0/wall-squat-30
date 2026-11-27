@@ -1,0 +1,195 @@
+.muted-eyebrow {
+  color: var(--color-text-secondary);
+}
+
+.small {
+  font-size: 13px;
+}
+
+.today-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+  }
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.big-time {
+  font-size: 64px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.summary-count {
+  font-size: 22px;
+}
+
+.bar {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--color-border);
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--color-accent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 60px;
+  border-radius: 14px;
+}
+
+.cell-number {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.cell-caption {
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.marker {
+  position: absolute;
+  top: 3px;
+  font-size: 11px;
+  line-height: 1;
+
+  &.made-up {
+    left: 5px;
+  }
+
+  &.manual {
+    right: 5px;
+  }
+}
+
+// Day colours, shared by the grid and the legend swatches.
+.complete {
+  background: var(--color-accent);
+  color: var(--color-surface);
+}
+
+.under-target {
+  border: 2px solid var(--color-accent);
+  background: var(--color-accent-dim);
+  color: var(--color-accent-soft);
+}
+
+.missed {
+  background: var(--color-missed);
+  color: #c9ccd2;
+}
+
+.upcoming,
+.pending {
+  border: 1.5px dashed #5a5d66;
+  color: var(--color-text-secondary);
+}
+
+.cell.today {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 0;
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.make-up {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.make-up-button {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  background: var(--color-text-primary);
+  color: var(--color-surface);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
