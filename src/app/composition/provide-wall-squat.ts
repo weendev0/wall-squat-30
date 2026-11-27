@@ -15,6 +15,7 @@ import {
   ExportHistoryCsvUseCase,
   FileSharer,
   GetChallengeOverviewUseCase,
+  GetCheckOffOverviewsUseCase,
   GetSessionHistoryUseCase,
   IdGenerator,
   MarkCelebrationShownUseCase,
@@ -139,6 +140,15 @@ export function provideWallSquat(): EnvironmentProviders {
         ),
     },
     {
+      provide: GetCheckOffOverviewsUseCase,
+      useFactory: () =>
+        new GetCheckOffOverviewsUseCase(
+          inject(CHALLENGE_REPOSITORY),
+          inject(CHECK_IN_REPOSITORY),
+          inject(CLOCK),
+        ),
+    },
+    {
       provide: CheckInUseCase,
       useFactory: () =>
         new CheckInUseCase(
@@ -156,7 +166,11 @@ export function provideWallSquat(): EnvironmentProviders {
     {
       provide: ExportHistoryCsvUseCase,
       useFactory: () =>
-        new ExportHistoryCsvUseCase(inject(CHALLENGE_REPOSITORY), inject(ATTEMPT_REPOSITORY)),
+        new ExportHistoryCsvUseCase(
+          inject(CHALLENGE_REPOSITORY),
+          inject(ATTEMPT_REPOSITORY),
+          inject(CHECK_IN_REPOSITORY),
+        ),
     },
 
     // Ask Safari to keep our data even when the phone runs low on space (spec section 5).

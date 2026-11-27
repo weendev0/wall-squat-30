@@ -116,7 +116,7 @@ export class SequentialIdGenerator implements IdGenerator {
 /** Remembers every beep instead of playing it. */
 export class FakeSoundPlayer implements SoundPlayer {
   isUnlocked = false;
-  readonly played: (CountdownCue | TimerCue)[] = [];
+  readonly played: (CountdownCue | TimerCue | 'chime')[] = [];
 
   async unlock(): Promise<void> {
     this.isUnlocked = true;
@@ -128,6 +128,10 @@ export class FakeSoundPlayer implements SoundPlayer {
 
   playTimerCue(cue: TimerCue): void {
     this.played.push(cue);
+  }
+
+  playChime(): void {
+    this.played.push('chime');
   }
 }
 

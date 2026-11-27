@@ -70,7 +70,7 @@
   background: var(--color-missed);
 
   &.complete {
-    background: var(--color-accent);
+    background: var(--tone);
   }
 
   &.under-target {
@@ -127,4 +127,23 @@
   font-weight: 600;
   text-align: center;
   text-decoration: none;
+}
+
+.muted-eyebrow {
+  color: var(--color-text-secondary);
+}
+
+.note-row {
+  align-items: flex-start;
+}
+
+.note-text {
+  font-size: 15px;
+  line-height: 1.4;
+  white-space: pre-line; // keep the line breaks typed in the note
+}
+
+// The check-off history component shares this stylesheet; it lays out inside the screen.
+:host {
+  display: contents;
 }

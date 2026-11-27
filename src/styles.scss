@@ -13,6 +13,50 @@
   --color-accent-soft: #ffb39c;
   --color-accent-muted: #8c4a35; // under-target bars in the History chart
   --color-missed: #3a3d45;
+
+  // One colour family per kind of challenge (canvas board 12): coral for exercise,
+  // sunny amber for reading, fresh mint for courses and study.
+  --color-reading: #f5b841;
+  --color-reading-dim: #3a2f17;
+  --color-reading-soft: #ffd98a;
+  --color-study: #5ed3b0;
+  --color-study-dim: #17352d;
+  --color-study-soft: #a6ebd6;
+}
+
+/**
+ * Tone classes set --tone, --tone-dim and --tone-soft for one challenge category,
+ * so a card, pill or button can use the challenge's own colour without knowing which it is.
+ */
+.tone-exercise {
+  --tone: var(--color-accent);
+  --tone-dim: var(--color-accent-dim);
+  --tone-soft: var(--color-accent-soft);
+}
+
+.tone-reading {
+  --tone: var(--color-reading);
+  --tone-dim: var(--color-reading-dim);
+  --tone-soft: var(--color-reading-soft);
+}
+
+.tone-course,
+.tone-study {
+  --tone: var(--color-study);
+  --tone-dim: var(--color-study-dim);
+  --tone-soft: var(--color-study-soft);
+}
+
+/** A small rounded label in the challenge's colour, e.g. READING. */
+.category-pill {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--tone-dim);
+  color: var(--tone-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 html,

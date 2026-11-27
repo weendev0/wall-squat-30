@@ -51,11 +51,41 @@ describe('New challenge screen', () => {
     expect(screen.text()).toContain('2:15');
   });
 
-  it('goes to Today when a challenge is already running', async () => {
+  it('offers only a check-off while a wall squat is running', async () => {
     await TestBed.inject(StartChallengeUseCase).execute(60);
 
     const screen = await openScreen('/new-challenge');
+    expect(
+      screen
+        .button('Daily check-off Tap Done once a day, with a note')
+        .getAttribute('aria-checked'),
+    ).toBe('true');
 
+    await screen.click('Timed Hold for a target time, like the wall squat');
+    expect(screen.text()).toContain('A wall squat challenge is already running.');
+    expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('BR-13: starts a Reading challenge with its name and opens Today', async () => {
+    const screen = await openScreen('/new-challenge');
+
+    await screen.click('Daily check-off Tap Done once a day, with a note');
+    expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
+
+    await screen.click('Course');
+    const name = screen.harness.routeNativeElement!.querySelector('input')!;
+    name.value = 'Angular signals';
+    name.dispatchEvent(new Event('input'));
+    await screen.harness.fixture.whenStable();
+    await screen.click('Start challenge');
+
+    const [challenge] = await fakes.challenges.findAll();
+    expect(challenge).toMatchObject({
+      kind: 'checkoff',
+      category: 'course',
+      name: 'Angular signals',
+    });
     expect(screen.currentUrl()).toBe('/today');
+    expect(screen.text()).toContain('Angular signals');
   });
 });

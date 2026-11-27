@@ -1,5 +1,9 @@
-@if (overview(); as overview) {
-  <main class="screen screen-in-tabs">
+<main class="screen screen-in-tabs" [class]="selected.tone()">
+  <app-challenge-tabs [checkOffs]="checkOffs()" [selectedId]="selected.id()" />
+
+  @if (selected.checkOff(); as checkOff) {
+    <app-check-off-history [overview]="checkOff" />
+  } @else if (overview(); as overview) {
     <h1 class="screen-title">History</h1>
 
     <section class="stats" aria-label="Totals">
@@ -66,5 +70,5 @@
       }
       <a class="see-all" routerLink="/sessions">See all sessions</a>
     </section>
-  </main>
-}
+  }
+</main>

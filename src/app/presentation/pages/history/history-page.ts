@@ -1,10 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Attempt, DayStatus, formatDuration } from '../../../domain';
 import { DurationPipe } from '../../shared/duration.pipe';
 import { shortDateLabel } from '../../shared/date-label';
 import { feelingLabel } from '../../shared/feelings';
+import { ChallengeTabs, selectedChallenge } from '../../shared/challenge-tabs';
 import { ChallengeStore } from '../../state/challenge-store';
+import { CheckOffStore } from '../../state/check-off-store';
+import { CheckOffHistory } from './check-off-history';
 
 /** One bar of the "Hold time per day" chart. */
 interface DayBar {
@@ -31,10 +34,13 @@ const CHART_HEADROOM = 4 / 3;
 /** Missed days still get a small bar, so the gap is visible. */
 const MIN_BAR_HEIGHT = 0.03;
 
-/** Screen 5: totals, the best hold of each day as a chart, and the latest attempts. */
+/**
+ * Screen 5: totals, the best hold of each day as a chart, and the latest attempts.
+ * Tabs at the top switch between challenges; a check-off challenge shows its notes.
+ */
 @Component({
   selector: 'app-history-page',
-  imports: [DurationPipe, RouterLink],
+  imports: [ChallengeTabs, CheckOffHistory, DurationPipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './history-page.html',
   styleUrl: './history-page.scss',
@@ -42,7 +48,17 @@ const MIN_BAR_HEIGHT = 0.03;
 export class HistoryPage {
   private readonly store = inject(ChallengeStore);
 
+  /** From ?challenge=<id>, set by the tabs. */
+  readonly challenge = input<string>();
+
   protected readonly overview = this.store.overview;
+  /** History also lists finished check-off challenges, so their notes stay readable. */
+  protected readonly checkOffs = inject(CheckOffStore).overviews;
+  protected readonly selected = selectedChallenge(
+    this.challenge,
+    this.store.overview,
+    this.checkOffs,
+  );
 
   /** The top of the chart, in seconds. */
   private readonly chartMaxSeconds = computed(() => {

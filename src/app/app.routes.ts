@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 import {
+  loadChallenges,
   requireAttemptDraft,
   requireCelebration,
   requireChallenge,
   requireChallengeDay,
-  requireNoActiveChallenge,
+  requireCheckOffCelebration,
+  requireCheckOffDay,
 } from './presentation/state/route-guards';
 import { TabShell } from './presentation/shell/tab-shell';
 
@@ -15,7 +17,7 @@ import { TabShell } from './presentation/shell/tab-shell';
 export const routes: Routes = [
   {
     path: 'new-challenge',
-    canActivate: [requireNoActiveChallenge],
+    canActivate: [loadChallenges],
     loadComponent: () =>
       import('./presentation/pages/new-challenge/new-challenge-page').then(
         (m) => m.NewChallengePage,
@@ -31,6 +33,18 @@ export const routes: Routes = [
     canActivate: [requireCelebration],
     loadComponent: () =>
       import('./presentation/pages/celebration/celebration-page').then((m) => m.CelebrationPage),
+  },
+  {
+    path: 'celebration/:challengeId',
+    canActivate: [requireCheckOffCelebration],
+    loadComponent: () =>
+      import('./presentation/pages/celebration/celebration-page').then((m) => m.CelebrationPage),
+  },
+  {
+    path: 'check-in/:challengeId',
+    canActivate: [requireCheckOffDay],
+    loadComponent: () =>
+      import('./presentation/pages/check-in/check-in-page').then((m) => m.CheckInPage),
   },
   {
     path: 'sessions',

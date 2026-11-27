@@ -25,3 +25,59 @@
 .start {
   margin-top: auto;
 }
+
+.back-link {
+  color: var(--color-accent-text);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.kinds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.kind {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 1.5px solid var(--color-missed);
+  border-radius: 16px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+
+  &[aria-checked='true'] {
+    border: 2px solid var(--color-accent);
+    background: var(--color-accent-dim);
+  }
+}
+
+.small {
+  font-size: 13px;
+}
+
+.check-off {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+// A picked category chip fills with its own colour (amber, mint).
+.category-chip[aria-pressed='true'] {
+  border-color: var(--tone);
+  background: var(--tone);
+}
+
+.start {
+  background: var(--tone);
+}

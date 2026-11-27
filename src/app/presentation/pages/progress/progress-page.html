@@ -1,6 +1,12 @@
-@if (overview(); as overview) {
-  <main class="screen screen-in-tabs">
-    <p class="eyebrow muted-eyebrow">Challenge · started {{ startedLabel() }}</p>
+<main class="screen screen-in-tabs" [class]="selected.tone()">
+  <app-challenge-tabs [checkOffs]="checkOffs()" [selectedId]="selected.id()" />
+
+  @if (selected.checkOff(); as checkOff) {
+    <app-check-off-progress [overview]="checkOff" />
+  } @else if (overview(); as overview) {
+    <p class="eyebrow muted-eyebrow">
+      {{ overview.challenge.name }} · started {{ startedLabel() }}
+    </p>
     <h1 class="screen-title">Progress</h1>
 
     @if (today(); as today) {
@@ -96,5 +102,5 @@
         >
       </section>
     }
-  </main>
-}
+  }
+</main>

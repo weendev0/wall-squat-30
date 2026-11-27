@@ -1,75 +1,78 @@
-@if (overview(); as overview) {
-  <main class="screen screen-in-tabs">
-    @if (today(); as today) {
-      <header class="top">
-        <p class="eyebrow">Day {{ today.dayNumber }} of {{ challengeLength }}</p>
-        <a class="settings-link" routerLink="/settings" aria-label="Settings">⚙</a>
-      </header>
-      <h1 class="screen-title">Today</h1>
+<main class="screen screen-in-tabs">
+  <header class="top">
+    <p class="eyebrow muted-eyebrow">{{ dateLabel }} · 30 Days Challenges</p>
+  </header>
+  <div class="title-row">
+    <h1 class="screen-title">Today</h1>
+    <div class="actions">
+      <a class="round-link" routerLink="/new-challenge" aria-label="New challenge">＋</a>
+      <a class="round-link" routerLink="/settings" aria-label="Settings">⚙</a>
+    </div>
+  </div>
+  <p class="muted">{{ doneTodayLabel() }}</p>
 
-      @if (savedNotice(); as notice) {
-        <div class="card notice" role="status">
-          <span>
-            Saved {{ notice.durationSeconds | duration }}.
-            @if (notice.isPersonalBest) {
-              <strong>New personal best!</strong>
-            }
-          </span>
-          <button type="button" class="button-quiet" (click)="dismissNotice()" aria-label="Close">
-            ✕
-          </button>
-        </div>
-      }
-
-      <section class="stats" aria-label="Your numbers">
-        <div class="card stat">
-          <span class="field-label">Streak</span>
-          <strong
-            >{{ overview.progress.currentStreak }}
-            {{ overview.progress.currentStreak === 1 ? 'day' : 'days' }}</strong
-          >
-        </div>
-        <div class="card stat">
-          <span class="field-label">Best hold</span>
-          <strong>{{ overview.progress.bestHoldSeconds | duration }}</strong>
-        </div>
-        <div class="card stat">
-          <span class="field-label">Completed</span>
-          <strong>{{ overview.progress.daysComplete }}/{{ challengeLength }}</strong>
-        </div>
-      </section>
-
-      <section class="card target">
-        <span class="field-label">Today's target</span>
-        <strong class="target-time">{{ overview.challenge.targetSeconds | duration }}</strong>
-        @if (today.attemptCount > 0) {
-          <p class="muted today-best">
-            @if (today.status === 'complete') {
-              ✓ Done.
-            }
-            Today's best {{ today.bestSeconds | duration }} · {{ today.attemptCount }}
-            {{ today.attemptCount === 1 ? 'attempt' : 'attempts' }}
-          </p>
+  @if (savedNotice(); as notice) {
+    <div class="card notice" role="status">
+      <span>
+        Saved {{ notice.durationSeconds | duration }}.
+        @if (notice.isPersonalBest) {
+          <strong>New personal best!</strong>
         }
-      </section>
+      </span>
+      <button type="button" class="button-quiet" (click)="dismissNotice()" aria-label="Close">
+        ✕
+      </button>
+    </div>
+  }
 
-      <button type="button" class="button-primary start" (click)="startHold()">START</button>
-      <p class="muted hint">3-second countdown before the timer starts</p>
-
-      <section aria-labelledby="recent-heading">
-        <h2 id="recent-heading" class="field-label">Last 7 days</h2>
-        <ol class="recent">
-          @for (day of recentDays(); track day.dayNumber) {
-            <li
-              [class]="'day ' + day.status"
-              [attr.aria-label]="'Day ' + day.dayNumber + ', ' + day.status"
-            >
-              <span class="dot"></span>
-              <span>D{{ day.dayNumber }}</span>
-            </li>
-          }
-        </ol>
-      </section>
+  <section class="cards" aria-label="Your challenges">
+    @if (wallSquat(); as overview) {
+      @if (wallSquatToday(); as today) {
+        <app-challenge-card
+          [category]="overview.challenge.category"
+          [name]="overview.challenge.name"
+          [dayNumber]="today.dayNumber"
+          [detail]="wallSquatDetail()"
+          [days]="overview.days"
+          [streak]="overview.progress.currentStreak"
+          [daysComplete]="overview.progress.daysComplete"
+        >
+          <button
+            type="button"
+            class="card-action"
+            [class.is-done]="today.status === 'complete'"
+            (click)="startHold()"
+          >
+            START
+          </button>
+        </app-challenge-card>
+      }
     }
-  </main>
-}
+
+    @if (!wallSquatToday() && checkOffCards().length === 0) {
+      <div class="card empty">
+        <p class="muted">No challenge is running right now.</p>
+        <a class="button-primary empty-action" routerLink="/new-challenge">Start a new challenge</a>
+      </div>
+    }
+
+    @for (card of checkOffCards(); track card.overview.challenge.id) {
+      <app-challenge-card
+        [category]="card.overview.challenge.category"
+        [name]="card.overview.challenge.name"
+        [dayNumber]="card.dayNumber"
+        [detail]="card.detail"
+        [days]="card.overview.days"
+        [streak]="card.overview.progress.currentStreak"
+        [daysComplete]="card.overview.progress.daysComplete"
+      >
+        <a
+          class="card-action"
+          [class.is-done]="card.isDoneToday"
+          [routerLink]="['/check-in', card.overview.challenge.id]"
+          >{{ card.isDoneToday ? 'Done ✓' : 'Done' }}</a
+        >
+      </app-challenge-card>
+    }
+  </section>
+</main>

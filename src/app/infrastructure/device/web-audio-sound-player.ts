@@ -26,13 +26,20 @@ const note = (frequencyHz: number, startsAfterSeconds: number, durationSeconds: 
  * The sound of every cue.
  * - The get-ready countdown has its own bright "blip" and a rising two-note "go".
  * - The timer cues are softer sine beeps; the target beep is the longest and highest.
+ * - The check-in chime is three quick rising notes.
  */
-const SOUNDS: Record<CountdownCue | TimerCue, CueSound> = {
+const SOUNDS: Record<CountdownCue | TimerCue | 'chime', CueSound> = {
   count: { wave: 'triangle', volume: 0.9, notes: [note(784, 0, 0.18)] },
   go: { wave: 'triangle', volume: 0.9, notes: [note(784, 0, 0.12), note(1175, 0.12, 0.4)] },
   halfway: { wave: 'sine', volume: 0.7, notes: [note(880, 0, 0.25)] },
   tick: { wave: 'sine', volume: 0.7, notes: [note(660, 0, 0.1)] },
   target: { wave: 'sine', volume: 0.8, notes: [note(1320, 0, 0.8)] },
+  // BR-16: a bright rising C-E-G, short and cheerful, for a check-off Done.
+  chime: {
+    wave: 'triangle',
+    volume: 0.7,
+    notes: [note(1047, 0, 0.12), note(1319, 0.1, 0.12), note(1568, 0.2, 0.35)],
+  },
 };
 
 const SILENT_VOLUME = 0.0001; // exponential ramps cannot start or end at exactly 0
@@ -74,6 +81,10 @@ export class WebAudioSoundPlayer implements SoundPlayer {
 
   playTimerCue(cue: TimerCue): void {
     this.play(SOUNDS[cue]);
+  }
+
+  playChime(): void {
+    this.play(SOUNDS.chime);
   }
 
   private play(sound: CueSound): void {

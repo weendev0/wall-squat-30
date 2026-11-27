@@ -1,7 +1,8 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateFn, Router } from '@angular/router';
 import { AttemptDraftStore } from './attempt-draft-store';
 import { ChallengeStore } from './challenge-store';
+import { CheckOffStore } from './check-off-store';
 
 /**
  * Route guards decide which screen may open.
@@ -9,16 +10,25 @@ import { ChallengeStore } from './challenge-store';
  */
 
 /**
- * Today, Progress and History need a challenge; without one the app opens New challenge.
- * Right after day 30 the Celebration screen comes first (BR-10).
+ * Today, Progress and History need at least one challenge; without one the app opens
+ * New challenge. Right after a challenge's day 30 its Celebration comes first (BR-10, BR-18).
  */
 export const requireChallenge: CanActivateFn = async () => {
   const router = inject(Router);
-  const overview = await inject(ChallengeStore).load();
-  if (overview === null) {
-    return router.createUrlTree(['/new-challenge']);
+  const challengeStore = inject(ChallengeStore);
+  const checkOffStore = inject(CheckOffStore);
+  const [wallSquat] = await Promise.all([challengeStore.load(), checkOffStore.load()]);
+
+  if (wallSquat?.needsCelebration) {
+    return router.createUrlTree(['/celebration']);
   }
-  return overview.needsCelebration ? router.createUrlTree(['/celebration']) : true;
+  const finished = checkOffStore.awaitingCelebration();
+  if (finished !== null) {
+    return router.createUrlTree(['/celebration', finished.challenge.id]);
+  }
+  // Finished check-off challenges count too, so their notes stay readable in History.
+  const hasAnyChallenge = wallSquat !== null || checkOffStore.overviews().length > 0;
+  return hasAnyChallenge ? true : router.createUrlTree(['/new-challenge']);
 };
 
 /** The Celebration screen only opens once, for a challenge that has just finished (BR-10). */
@@ -28,11 +38,30 @@ export const requireCelebration: CanActivateFn = async () => {
   return overview?.needsCelebration ? true : router.createUrlTree(['/today']);
 };
 
-/** New challenge is only for when no challenge is running (one active challenge at a time). */
-export const requireNoActiveChallenge: CanActivateFn = async () => {
+/** BR-18: a finished check-off challenge's celebration, shown once. */
+export const requireCheckOffCelebration: CanActivateFn = async (route: ActivatedRouteSnapshot) => {
   const router = inject(Router);
-  const overview = await inject(ChallengeStore).load();
-  return overview?.challenge.status === 'active' ? router.createUrlTree(['/today']) : true;
+  const store = inject(CheckOffStore);
+  await store.load();
+  const overview = store.find(route.paramMap.get('challengeId') ?? '');
+  return overview?.needsCelebration ? true : router.createUrlTree(['/today']);
+};
+
+/** New challenge needs both stores loaded, to know whether a wall squat is already running. */
+export const loadChallenges: CanActivateFn = async () => {
+  const challengeStore = inject(ChallengeStore);
+  const checkOffStore = inject(CheckOffStore);
+  await Promise.all([challengeStore.load(), checkOffStore.load()]);
+  return true;
+};
+
+/** Check-in needs a running check-off challenge with a day to record (BR-14). */
+export const requireCheckOffDay: CanActivateFn = async (route: ActivatedRouteSnapshot) => {
+  const router = inject(Router);
+  const store = inject(CheckOffStore);
+  await store.load();
+  const overview = store.find(route.paramMap.get('challengeId') ?? '');
+  return overview?.todayDayNumber ? true : router.createUrlTree(['/today']);
 };
 
 /** The timer needs a challenge day to record into. */

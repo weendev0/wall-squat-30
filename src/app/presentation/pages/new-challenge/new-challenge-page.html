@@ -1,42 +1,114 @@
 <main class="screen">
-  <p class="eyebrow">Wall Squat Challenge 30 Days</p>
+  @if (hasAnyChallenge) {
+    <a class="back-link" routerLink="/today">‹ Today</a>
+  } @else {
+    <p class="eyebrow">30 Days Challenges</p>
+  }
   <h1 class="screen-title">New challenge</h1>
   <p class="muted">30 days, starting today, {{ startDateLabel }}</p>
 
-  <section class="card target" aria-labelledby="target-heading">
-    <h2 id="target-heading" class="field-label">Daily target</h2>
-
-    <div class="stepper">
-      <button type="button" class="chip" (click)="changeBy(-step)" aria-label="5 seconds less">
-        −5s
-      </button>
-      <output class="target-value" aria-live="polite">{{ targetSeconds() | duration }}</output>
-      <button type="button" class="chip" (click)="changeBy(step)" aria-label="5 seconds more">
-        +5s
-      </button>
-    </div>
-
-    <app-duration-fields [seconds]="targetSeconds()" (secondsChange)="setTarget($event)" />
-
-    <div class="presets">
-      @for (preset of presets; track preset) {
+  <section aria-labelledby="kind-heading">
+    <h2 id="kind-heading" class="field-label">What kind of challenge?</h2>
+    <div class="kinds" role="radiogroup" aria-labelledby="kind-heading">
+      @for (option of kindOptions; track option.kind) {
         <button
           type="button"
-          class="chip"
-          [attr.aria-pressed]="preset === targetSeconds()"
-          (click)="setTarget(preset)"
+          role="radio"
+          class="kind"
+          [attr.aria-checked]="option.kind === kind()"
+          (click)="pickKind(option.kind)"
         >
-          {{ preset | duration }}
+          <strong>{{ option.title }}</strong>
+          <span class="muted small">{{ option.description }}</span>
         </button>
       }
     </div>
   </section>
 
+  @if (kind() === 'timed') {
+    @if (isWallSquatRunning) {
+      <p class="card muted">
+        A wall squat challenge is already running. You can start a new one after its day 30.
+      </p>
+    } @else {
+      <section class="card target" aria-labelledby="target-heading">
+        <h2 id="target-heading" class="field-label">Daily target</h2>
+
+        <div class="stepper">
+          <button type="button" class="chip" (click)="changeBy(-step)" aria-label="5 seconds less">
+            −5s
+          </button>
+          <output class="target-value" aria-live="polite">{{ targetSeconds() | duration }}</output>
+          <button type="button" class="chip" (click)="changeBy(step)" aria-label="5 seconds more">
+            +5s
+          </button>
+        </div>
+
+        <app-duration-fields [seconds]="targetSeconds()" (secondsChange)="setTarget($event)" />
+
+        <div class="presets">
+          @for (preset of presets; track preset) {
+            <button
+              type="button"
+              class="chip"
+              [attr.aria-pressed]="preset === targetSeconds()"
+              (click)="setTarget(preset)"
+            >
+              {{ preset | duration }}
+            </button>
+          }
+        </div>
+      </section>
+    }
+  } @else {
+    <section class="check-off" aria-label="Daily check-off">
+      <div>
+        <h2 class="field-label">Category</h2>
+        <div class="categories">
+          @for (option of categories; track option) {
+            <button
+              type="button"
+              class="chip category-chip"
+              [class]="toneClass(option)"
+              [attr.aria-pressed]="option === category()"
+              (click)="category.set(option)"
+            >
+              {{ categoryLabels[option] }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <label>
+        <span class="field-label">Name</span>
+        <input
+          class="text-field"
+          [value]="name()"
+          (input)="name.set($any($event.target).value)"
+          [attr.maxlength]="maxNameLength"
+          placeholder="For example Atomic Habits"
+          autocomplete="off"
+        />
+      </label>
+
+      <p class="muted small">
+        Each day you tap Done and can add a note. No timer. A missed day can be made up later; it
+        counts toward your 30 days, not your streak.
+      </p>
+    </section>
+  }
+
   @if (errorMessage()) {
     <p class="error-text" role="alert">{{ errorMessage() }}</p>
   }
 
-  <button type="button" class="button-primary start" [disabled]="isStarting()" (click)="start()">
+  <button
+    type="button"
+    class="button-primary start"
+    [class]="startTone()"
+    [disabled]="isStarting() || !canStart()"
+    (click)="start()"
+  >
     Start challenge
   </button>
 </main>

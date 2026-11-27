@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 import { CHALLENGE_LENGTH_DAYS } from '../../../domain';
 import { DurationPipe } from '../../shared/duration.pipe';
 import { ChallengeStore } from '../../state/challenge-store';
+import { CheckOffStore } from '../../state/check-off-store';
 
 /** A confetti piece: where it sits and how it looks. Fixed, so the screen looks the same every time. */
 interface ConfettiPiece {
@@ -16,7 +17,11 @@ interface ConfettiPiece {
 const CONFETTI_COLORS = ['#E4572E', '#FFB39C', '#F5F4F0', '#FF8A66'];
 const CONFETTI_COUNT = 24;
 
-/** Screen 11: shown once after day 30 (BR-10), with the final numbers of the challenge. */
+/**
+ * Screen 11: shown once after day 30, with the final numbers of the challenge.
+ * /celebration is for the wall squat (BR-10); /celebration/:challengeId for a
+ * Reading, Course or Study challenge (BR-18).
+ */
 @Component({
   selector: 'app-celebration-page',
   imports: [DurationPipe],
@@ -26,10 +31,19 @@ const CONFETTI_COUNT = 24;
 })
 export class CelebrationPage {
   private readonly store = inject(ChallengeStore);
+  private readonly checkOffStore = inject(CheckOffStore);
   private readonly router = inject(Router);
 
-  // The route guard makes sure a finished challenge is waiting for its celebration.
-  protected readonly overview = this.store.overview()!;
+  /** From /celebration/:challengeId; left out for the wall squat. */
+  readonly challengeId = input<string>();
+
+  // The route guards make sure a finished challenge is waiting for its celebration.
+  // Kept as it was on arrival, so the numbers stay on screen while the buttons save.
+  protected readonly wallSquat = this.store.overview();
+  protected readonly checkOff = computed(() => {
+    const id = this.challengeId();
+    return id === undefined ? null : this.checkOffStore.find(id);
+  });
   protected readonly challengeLength = CHALLENGE_LENGTH_DAYS;
   protected readonly confetti: readonly ConfettiPiece[] = Array.from(
     { length: CONFETTI_COUNT },
@@ -43,12 +57,28 @@ export class CelebrationPage {
   );
 
   protected async startNewChallenge(): Promise<void> {
-    await this.store.markCelebrationShown();
+    await this.markShown();
     await this.router.navigate(['/new-challenge']);
   }
 
   protected async viewInHistory(): Promise<void> {
-    await this.store.markCelebrationShown();
-    await this.router.navigate(['/sessions'], { queryParams: { filter: 'past' } });
+    await this.markShown();
+    const checkOff = this.checkOff();
+    if (checkOff) {
+      await this.router.navigate(['/history'], {
+        queryParams: { challenge: checkOff.challenge.id },
+      });
+    } else {
+      await this.router.navigate(['/sessions'], { queryParams: { filter: 'past' } });
+    }
+  }
+
+  private async markShown(): Promise<void> {
+    const checkOff = this.checkOff();
+    if (checkOff) {
+      await this.checkOffStore.markCelebrationShown(checkOff.challenge.id);
+    } else {
+      await this.store.markCelebrationShown();
+    }
   }
 }

@@ -18,7 +18,7 @@ describe('Progress screen', () => {
 
     const screen = await openScreen('/progress');
 
-    expect(screen.text()).toContain('Challenge · started Mon 16 Nov');
+    expect(screen.text()).toContain('Wall squat · started Mon 16 Nov');
     expect(screen.text()).toContain('Target hit. Day 3 done. 1:14 +14s over target');
   });
 

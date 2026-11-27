@@ -112,6 +112,18 @@ describe('WebAudioSoundPlayer', () => {
     ]);
   });
 
+  it('BR-16: plays a cheerful rising three-note chime for a check-in', async () => {
+    await player.unlock();
+
+    player.playChime();
+
+    expect(context.notes.map((n) => [n.wave, n.frequencyHz])).toEqual([
+      ['triangle', 1047],
+      ['triangle', 1319],
+      ['triangle', 1568],
+    ]);
+  });
+
   it('keeps the first countdown beep when audio is still waking up', async () => {
     const unlocking = player.unlock(); // the tap
     context.state = 'suspended'; // iOS has not finished resuming yet

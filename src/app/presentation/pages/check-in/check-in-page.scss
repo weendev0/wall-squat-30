@@ -1,0 +1,67 @@
+.back-link {
+  color: var(--tone-soft);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.small {
+  font-size: 13px;
+}
+
+.done-area {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.done-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 180px;
+  height: 180px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 3px var(--tone);
+  color: var(--tone);
+  cursor: pointer;
+
+  &.is-done {
+    background: var(--tone);
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--tone) 18%, transparent);
+    color: var(--color-on-accent);
+  }
+}
+
+.done-text {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.hint {
+  max-width: 280px;
+  text-align: center;
+}
+
+.note textarea {
+  min-height: 112px;
+  resize: none;
+  line-height: 1.4;
+}
+
+.save {
+  background: var(--tone);
+}

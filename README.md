@@ -1,6 +1,6 @@
-# Wall Squat Challenge 30 Days
+# 30 Days Challenges
 
-A free Progressive Web App (PWA) that times your daily wall squat and tracks a 30-day challenge.
+A free Progressive Web App (PWA) for 30-day challenges that run side by side: a timed wall squat, plus Reading, Course and Study check-offs with a daily note.
 It is built with Angular 21, hosted on GitHub Pages and keeps all data on your phone.
 
 ## Install it on your iPhone

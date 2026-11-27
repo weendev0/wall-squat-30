@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Wall Squat Challenge 30 Days",
-  "short_name": "Wall Squat 30",
-  "description": "Time your daily wall squat and track a 30-day challenge.",
+  "name": "30 Days Challenges",
+  "short_name": "30 Days",
+  "description": "Run 30-day challenges side by side: a timed wall squat, plus daily reading and study check-offs with notes.",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#121317",

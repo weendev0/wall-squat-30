@@ -26,7 +26,7 @@ describe('Settings screen', () => {
     await screen.click('Export history (CSV)');
 
     const [file] = fakes.fileSharer.sharedFiles;
-    expect(file.fileName).toBe('wall-squat-history-2026-11-17.csv');
+    expect(file.fileName).toBe('30-days-challenges-2026-11-17.csv');
     expect(file.text.split('\n')).toHaveLength(2); // header and one attempt
     expect(screen.text()).toContain('History exported.');
   });
