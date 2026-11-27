@@ -1,0 +1,62 @@
+<main class="screen">
+  <a class="back" routerLink="/today">‹ Today</a>
+  <h1 class="screen-title">Settings</h1>
+
+  <section aria-labelledby="timer-heading">
+    <h2 id="timer-heading" class="field-label">Timer</h2>
+    <dl class="card rows">
+      <div class="row">
+        <dt>Get-ready countdown</dt>
+        <dd class="muted">3 seconds</dd>
+      </div>
+      <div class="row">
+        <dt>Beeps</dt>
+        <dd class="muted">0:30, last 3 seconds, target</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="data-heading">
+    <h2 id="data-heading" class="field-label">Your data</h2>
+    <div class="card rows">
+      <button type="button" class="row row-button" (click)="exportHistory()">
+        Export history (CSV)
+      </button>
+      <button type="button" class="row row-button danger" (click)="isConfirmingReset.set(true)">
+        Reset all history…
+      </button>
+    </div>
+    <p class="muted small note">
+      Your sessions are saved on this iPhone and kept when the app updates. Removing the app from
+      your Home Screen deletes them, so export a CSV now and then as a backup.
+    </p>
+    @if (message()) {
+      <p class="muted small" role="status">{{ message() }}</p>
+    }
+  </section>
+
+  @if (isConfirmingReset()) {
+    <div class="backdrop">
+      <section
+        class="card dialog"
+        role="alertdialog"
+        aria-labelledby="reset-title"
+        aria-describedby="reset-text"
+      >
+        <h2 id="reset-title" class="dialog-title">Reset all history?</h2>
+        <p id="reset-text" class="muted">
+          This deletes all sessions, streaks and challenges from this app. This can't be undone.
+        </p>
+        <button type="button" class="button-secondary" (click)="exportHistory()">
+          Export first
+        </button>
+        <div class="dialog-actions">
+          <button type="button" class="button-quiet" (click)="isConfirmingReset.set(false)">
+            Cancel
+          </button>
+          <button type="button" class="button-primary" (click)="reset()">Reset</button>
+        </div>
+      </section>
+    </div>
+  }
+</main>

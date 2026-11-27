@@ -1,10 +1,13 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   ChallengeOverview,
+  DeleteAttemptUseCase,
   GetChallengeOverviewUseCase,
+  MarkCelebrationShownUseCase,
   RecordAttemptInput,
   RecordAttemptResult,
   RecordAttemptUseCase,
+  ResetHistoryUseCase,
   StartChallengeUseCase,
 } from '../../application';
 import { DayResult } from '../../domain';
@@ -25,6 +28,9 @@ export class ChallengeStore {
   private readonly getOverview = inject(GetChallengeOverviewUseCase);
   private readonly startChallenge = inject(StartChallengeUseCase);
   private readonly recordAttempt = inject(RecordAttemptUseCase);
+  private readonly deleteAttemptUseCase = inject(DeleteAttemptUseCase);
+  private readonly resetHistoryUseCase = inject(ResetHistoryUseCase);
+  private readonly markCelebrationShownUseCase = inject(MarkCelebrationShownUseCase);
 
   private readonly overviewState = signal<ChallengeOverview | null>(null);
   private readonly savedNoticeState = signal<SavedNotice | null>(null);
@@ -61,6 +67,28 @@ export class ChallengeStore {
       await this.load();
     }
     return result;
+  }
+
+  async deleteAttempt(attemptId: string): Promise<void> {
+    await this.deleteAttemptUseCase.execute(attemptId);
+    this.savedNoticeState.set(null);
+    await this.load();
+  }
+
+  /** BR-11: deletes every challenge and attempt. */
+  async resetHistory(): Promise<void> {
+    await this.resetHistoryUseCase.execute();
+    this.savedNoticeState.set(null);
+    await this.load();
+  }
+
+  /** BR-10: the celebration is shown once; after this the finished challenge moves to history. */
+  async markCelebrationShown(): Promise<void> {
+    const challenge = this.overviewState()?.challenge;
+    if (challenge) {
+      await this.markCelebrationShownUseCase.execute(challenge.id);
+      await this.load();
+    }
   }
 
   dismissSavedNotice(): void {

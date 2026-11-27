@@ -1,0 +1,49 @@
+<main class="screen celebration">
+  <div class="confetti" aria-hidden="true">
+    @for (piece of confetti; track $index) {
+      <span
+        class="piece"
+        [style.left.%]="piece.left"
+        [style.top.%]="piece.top"
+        [style.width.px]="piece.width"
+        [style.background]="piece.color"
+        [style.transform]="'rotate(' + piece.rotation + 'deg)'"
+      ></span>
+    }
+  </div>
+
+  <span class="trophy" aria-hidden="true">🏆</span>
+  <h1 class="screen-title">{{ challengeLength }} days done!</h1>
+  <p class="muted">You finished the Wall Squat Challenge. Your legs earned this one.</p>
+
+  <dl class="stats">
+    <div class="card stat">
+      <dt class="field-label">Days complete</dt>
+      <dd>{{ overview.progress.daysComplete }}/{{ challengeLength }}</dd>
+    </div>
+    <div class="card stat">
+      <dt class="field-label">Best hold</dt>
+      <dd>{{ overview.progress.bestHoldSeconds | duration }}</dd>
+    </div>
+    <div class="card stat">
+      <dt class="field-label">Total time</dt>
+      <dd>{{ overview.progress.totalSeconds | duration }}</dd>
+    </div>
+    <div class="card stat">
+      <dt class="field-label">Longest streak</dt>
+      <dd>
+        {{ overview.progress.longestStreak }}
+        {{ overview.progress.longestStreak === 1 ? 'day' : 'days' }}
+      </dd>
+    </div>
+  </dl>
+
+  <div class="actions">
+    <button type="button" class="button-primary" (click)="startNewChallenge()">
+      Start a new challenge
+    </button>
+    <button type="button" class="button-quiet" (click)="viewInHistory()">
+      View this challenge in history
+    </button>
+  </div>
+</main>

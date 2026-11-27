@@ -4,14 +4,17 @@ import {
   DeleteAttemptUseCase,
   ExportHistoryCsvUseCase,
   GetChallengeOverviewUseCase,
+  GetSessionHistoryUseCase,
   MarkCelebrationShownUseCase,
   RecordAttemptUseCase,
   ResetHistoryUseCase,
   StartChallengeUseCase,
 } from '../application';
+import { BrowserFileSharer } from '../infrastructure/device/browser-file-sharer';
 import { BrowserScreenWakeLock } from '../infrastructure/device/browser-screen-wake-lock';
 import { WebAudioSoundPlayer } from '../infrastructure/device/web-audio-sound-player';
 import {
+  FILE_SHARER,
   provideWallSquat,
   SCREEN_WAKE_LOCK,
   SOUND_PLAYER,
@@ -30,6 +33,7 @@ describe('provideWallSquat', () => {
   const useCases: Type<unknown>[] = [
     StartChallengeUseCase,
     GetChallengeOverviewUseCase,
+    GetSessionHistoryUseCase,
     RecordAttemptUseCase,
     DeleteAttemptUseCase,
     MarkCelebrationShownUseCase,
@@ -44,6 +48,7 @@ describe('provideWallSquat', () => {
   it('provides the sound and screen-awake services of the browser', () => {
     expect(TestBed.inject(SOUND_PLAYER)).toBeInstanceOf(WebAudioSoundPlayer);
     expect(TestBed.inject(SCREEN_WAKE_LOCK)).toBeInstanceOf(BrowserScreenWakeLock);
+    expect(TestBed.inject(FILE_SHARER)).toBeInstanceOf(BrowserFileSharer);
   });
 
   it('wires the use cases to real storage end to end', async () => {

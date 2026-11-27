@@ -1,0 +1,81 @@
+<main class="screen">
+  <a class="back" routerLink="/history">‹ History</a>
+  <h1 class="screen-title">All sessions</h1>
+
+  <div class="filters" role="group" aria-label="Show">
+    @for (option of filters; track option.value) {
+      <button
+        type="button"
+        class="chip"
+        [attr.aria-pressed]="selectedFilter() === option.value"
+        (click)="selectedFilter.set(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <p class="error-text" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @for (sessions of visible(); track sessions.challenge.id) {
+    <section class="challenge" [attr.aria-label]="heading(sessions)">
+      <p class="muted small">{{ heading(sessions) }} · best of each day counts</p>
+
+      @for (day of sessions.days; track day.dayNumber) {
+        <article class="card day">
+          <header class="day-header">
+            <strong>Day {{ day.dayNumber }} · {{ dayLabel(day.date) }}</strong>
+            <span class="badge" [class.hit]="day.status === 'complete'"
+              >Best {{ day.bestSeconds | duration }}</span
+            >
+          </header>
+
+          <ul class="attempts">
+            @for (attempt of day.attempts; track attempt.id) {
+              <li class="attempt">
+                @if (confirmingDeleteId() === attempt.id) {
+                  <span>Delete {{ attempt.durationSeconds | duration }}?</span>
+                  <span class="confirm-actions">
+                    <button
+                      type="button"
+                      class="button-quiet"
+                      (click)="confirmingDeleteId.set(null)"
+                    >
+                      Keep
+                    </button>
+                    <button
+                      type="button"
+                      class="button-quiet danger"
+                      (click)="confirmDelete(attempt.id)"
+                    >
+                      Delete
+                    </button>
+                  </span>
+                } @else {
+                  <span class="attempt-text">
+                    <strong>{{ attempt.durationSeconds | duration }}</strong>
+                    <span class="muted small">{{ attemptDetails(attempt) }}</span>
+                  </span>
+                  <button
+                    type="button"
+                    class="button-quiet icon-button"
+                    [attr.aria-label]="'Delete ' + (attempt.durationSeconds | duration)"
+                    (click)="confirmingDeleteId.set(attempt.id)"
+                  >
+                    🗑
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </article>
+      } @empty {
+        <p class="muted">No attempts in this challenge yet.</p>
+      }
+    </section>
+  } @empty {
+    <p class="muted">Nothing to show here yet.</p>
+  }
+</main>

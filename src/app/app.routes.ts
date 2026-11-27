@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import {
   requireAttemptDraft,
+  requireCelebration,
   requireChallenge,
   requireChallengeDay,
   requireNoActiveChallenge,
@@ -24,6 +25,22 @@ export const routes: Routes = [
     path: 'timer',
     canActivate: [requireChallengeDay],
     loadComponent: () => import('./presentation/pages/timer/timer-page').then((m) => m.TimerPage),
+  },
+  {
+    path: 'celebration',
+    canActivate: [requireCelebration],
+    loadComponent: () =>
+      import('./presentation/pages/celebration/celebration-page').then((m) => m.CelebrationPage),
+  },
+  {
+    path: 'sessions',
+    loadComponent: () =>
+      import('./presentation/pages/sessions/sessions-page').then((m) => m.SessionsPage),
+  },
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('./presentation/pages/settings/settings-page').then((m) => m.SettingsPage),
   },
   {
     path: 'add-attempt',

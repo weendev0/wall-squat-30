@@ -3,8 +3,10 @@ import {
   AttemptRepository,
   ChallengeRepository,
   Clock,
+  FileSharer,
   IdGenerator,
   ScreenWakeLock,
+  ShareOutcome,
   SoundPlayer,
 } from '../ports';
 
@@ -109,5 +111,16 @@ export class FakeScreenWakeLock implements ScreenWakeLock {
 
   async release(): Promise<void> {
     this.isHeld = false;
+  }
+}
+
+/** Keeps the shared file instead of opening a share sheet. */
+export class FakeFileSharer implements FileSharer {
+  readonly sharedFiles: { fileName: string; text: string }[] = [];
+  outcome: ShareOutcome = 'shared';
+
+  async shareText(fileName: string, text: string): Promise<ShareOutcome> {
+    this.sharedFiles.push({ fileName, text });
+    return this.outcome;
   }
 }

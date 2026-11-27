@@ -1,6 +1,7 @@
 import { EnvironmentProviders, Provider } from '@angular/core';
 import {
   FakeClock,
+  FakeFileSharer,
   FakeScreenWakeLock,
   FakeSoundPlayer,
   InMemoryAttemptRepository,
@@ -11,6 +12,7 @@ import {
   ATTEMPT_REPOSITORY,
   CHALLENGE_REPOSITORY,
   CLOCK,
+  FILE_SHARER,
   ID_GENERATOR,
   provideWallSquat,
   SCREEN_WAKE_LOCK,
@@ -30,6 +32,7 @@ export function provideWallSquatTesting(today = '2026-11-16') {
     ids: new SequentialIdGenerator(),
     sound: new FakeSoundPlayer(),
     wakeLock: new FakeScreenWakeLock(),
+    fileSharer: new FakeFileSharer(),
   };
 
   const providers: (Provider | EnvironmentProviders)[] = [
@@ -40,6 +43,7 @@ export function provideWallSquatTesting(today = '2026-11-16') {
     { provide: ID_GENERATOR, useValue: fakes.ids },
     { provide: SOUND_PLAYER, useValue: fakes.sound },
     { provide: SCREEN_WAKE_LOCK, useValue: fakes.wakeLock },
+    { provide: FILE_SHARER, useValue: fakes.fileSharer },
   ];
 
   return { providers, fakes };
