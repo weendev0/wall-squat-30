@@ -9,6 +9,7 @@ import {
   isTooShortToKeep,
 } from '../../domain';
 import { AttemptRepository, ChallengeRepository, Clock, IdGenerator } from '../ports';
+import { findActiveTimedChallenge } from './find-active-timed-challenge';
 
 export interface RecordAttemptInput {
   readonly durationSeconds: number;
@@ -24,7 +25,7 @@ export type RecordAttemptResult =
   | { readonly status: 'saved'; readonly attempt: Attempt; readonly isPersonalBest: boolean };
 
 /**
- * Saves a timed or hand-typed attempt into the active challenge.
+ * Saves a timed or hand-typed attempt into the active wall squat challenge.
  * - BR-05: a timed attempt under 5 seconds is discarded without an error.
  * - BR-07: an attempt for an earlier day is a make-up.
  * - BR-08: a manual attempt keeps source 'manual'.
@@ -42,7 +43,7 @@ export class RecordAttemptUseCase {
       return { status: 'too-short' };
     }
 
-    const challenge = await this.challenges.findActive();
+    const challenge = await findActiveTimedChallenge(this.challenges);
     if (challenge === null) {
       throw new DomainError('Start a challenge before recording an attempt.');
     }

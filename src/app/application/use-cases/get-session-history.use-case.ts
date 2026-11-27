@@ -1,4 +1,11 @@
-import { Attempt, buildDayResults, Challenge, DayStatus, LocalDate } from '../../domain';
+import {
+  Attempt,
+  buildDayResults,
+  DayStatus,
+  isTimedChallenge,
+  LocalDate,
+  TimedChallenge,
+} from '../../domain';
 import { AttemptRepository, ChallengeRepository, Clock } from '../ports';
 
 /** One challenge day that has attempts, as listed on All sessions. */
@@ -14,7 +21,7 @@ export interface SessionDay {
 
 /** All sessions of one challenge. */
 export interface ChallengeSessions {
-  readonly challenge: Challenge;
+  readonly challenge: TimedChallenge;
   /** Only days with attempts, newest day first. */
   readonly days: readonly SessionDay[];
   readonly attemptCount: number;
@@ -23,7 +30,7 @@ export interface ChallengeSessions {
 }
 
 /**
- * The full history for the All sessions screen: every challenge, newest first,
+ * The full history for the All sessions screen: every wall squat challenge, newest first,
  * with its attempts grouped by day. Nothing is filtered here; the screen does that.
  */
 export class GetSessionHistoryUseCase {
@@ -39,6 +46,7 @@ export class GetSessionHistoryUseCase {
     const attempts = await this.attempts.findAll();
 
     return challenges
+      .filter(isTimedChallenge)
       .sort((a, b) => b.startDate.localeCompare(a.startDate))
       .map((challenge) => {
         const ownAttempts = attempts.filter((attempt) => attempt.challengeId === challenge.id);
@@ -48,7 +56,7 @@ export class GetSessionHistoryUseCase {
 }
 
 function toChallengeSessions(
-  challenge: Challenge,
+  challenge: TimedChallenge,
   attempts: readonly Attempt[],
   today: LocalDate,
 ): ChallengeSessions {

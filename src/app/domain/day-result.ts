@@ -1,12 +1,13 @@
 import { Attempt } from './attempt';
 import { CHALLENGE_LENGTH_DAYS } from './challenge-rules.constants';
-import { Challenge, dateOfDay } from './challenge';
+import { Challenge, CheckOffChallenge, dateOfDay, TimedChallenge } from './challenge';
+import { CheckIn } from './check-in';
 import { LocalDate } from './local-date';
 
 /**
  * What a challenge day looks like on the Progress grid.
- * - complete: the best attempt reached the target (BR-04)
- * - under-target: attempts exist, but none reached the target
+ * - complete: the best attempt reached the target (BR-04), or Done was tapped (BR-14)
+ * - under-target: attempts exist, but none reached the target (timed challenges only)
  * - missed: a past day with no attempts
  * - pending: today, nothing recorded yet
  * - upcoming: a day still to come
@@ -27,11 +28,13 @@ export interface DayResult {
   /** BR-08: at least one attempt was added by hand. Shown with a pencil icon. */
   readonly hasManualAttempt: boolean;
   readonly attemptCount: number;
+  /** BR-15: the day has a note. Shown with a pencil-on-paper mark on Progress. */
+  readonly hasNote: boolean;
 }
 
-/** Builds the 30 day results of a challenge from its attempts, as seen on `today`. */
+/** Builds the 30 day results of a timed challenge from its attempts, as seen on `today`. */
 export function buildDayResults(
-  challenge: Challenge,
+  challenge: TimedChallenge,
   attempts: readonly Attempt[],
   today: LocalDate,
 ): DayResult[] {
@@ -46,7 +49,7 @@ export function buildDayResults(
 }
 
 function buildDayResult(
-  challenge: Challenge,
+  challenge: TimedChallenge,
   dayNumber: number,
   attemptsOfDay: readonly Attempt[],
   today: LocalDate,
@@ -69,6 +72,47 @@ function buildDayResult(
     completedByMakeUp,
     hasManualAttempt: attemptsOfDay.some((attempt) => attempt.source === 'manual'),
     attemptCount: attemptsOfDay.length,
+    hasNote: attemptsOfDay.some((attempt) => attempt.note !== ''),
+  };
+}
+
+/**
+ * Builds the 30 day results of a check-off challenge from its check-ins (BR-14).
+ * The result has the same shape as a timed day, so streaks, make-ups and the
+ * Progress grid work the same way for both kinds (BR-17, BR-18).
+ */
+export function buildCheckOffDayResults(
+  challenge: CheckOffChallenge,
+  checkIns: readonly CheckIn[],
+  today: LocalDate,
+): DayResult[] {
+  const results: DayResult[] = [];
+  for (let dayNumber = 1; dayNumber <= CHALLENGE_LENGTH_DAYS; dayNumber++) {
+    const checkIn = checkIns.find(
+      (item) => item.challengeId === challenge.id && item.dayNumber === dayNumber,
+    );
+    results.push(buildCheckOffDayResult(challenge, dayNumber, checkIn, today));
+  }
+  return results;
+}
+
+function buildCheckOffDayResult(
+  challenge: Challenge,
+  dayNumber: number,
+  checkIn: CheckIn | undefined,
+  today: LocalDate,
+): DayResult {
+  const date = dateOfDay(challenge, dayNumber);
+  return {
+    dayNumber,
+    date,
+    status: checkIn ? 'complete' : statusWithoutRecord(date, today),
+    bestSeconds: null,
+    completedOnTime: checkIn !== undefined && !checkIn.isMakeUp,
+    completedByMakeUp: checkIn?.isMakeUp ?? false,
+    hasManualAttempt: false,
+    attemptCount: 0,
+    hasNote: (checkIn?.note ?? '') !== '',
   };
 }
 
@@ -81,6 +125,11 @@ function statusOf(
   if (bestSeconds !== null) {
     return bestSeconds >= targetSeconds ? 'complete' : 'under-target';
   }
+  return statusWithoutRecord(date, today);
+}
+
+/** A day with nothing recorded: still to come, today, or missed. */
+function statusWithoutRecord(date: LocalDate, today: LocalDate): DayStatus {
   if (date > today) {
     return 'upcoming';
   }

@@ -18,3 +18,12 @@ export const MIN_ATTEMPT_SECONDS = 5;
 
 /** BR-08: a manual attempt cannot be longer than this (a sanity limit for typos). */
 export const MAX_ATTEMPT_SECONDS = 3600;
+
+/** BR-13: the name the wall squat challenge gets, also for challenges saved before names existed. */
+export const WALL_SQUAT_NAME = 'Wall squat';
+
+/** BR-13: long enough for a book title, short enough to fit on a Today card. */
+export const MAX_CHALLENGE_NAME_LENGTH = 40;
+
+/** BR-15: a daily note is for a few thoughts, not a whole essay. */
+export const MAX_NOTE_LENGTH = 1000;
