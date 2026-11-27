@@ -8,6 +8,7 @@ import {
   MAX_CHALLENGE_NAME_LENGTH,
   MAX_TARGET_SECONDS,
   MIN_TARGET_SECONDS,
+  WALL_SQUAT_NAME,
 } from '../../../domain';
 import { CLOCK } from '../../../composition/provide-wall-squat';
 import { CATEGORY_LABELS, CHECK_OFF_CATEGORIES, toneClass } from '../../shared/challenge-category';
@@ -28,7 +29,7 @@ interface KindOption {
 
 /**
  * Screens 9 and 13: start a 30-day challenge today (BR-01, BR-13).
- * - Timed: pick the daily target (BR-02). Only one wall squat runs at a time.
+ * - Timed: pick a name and the daily target (BR-02). Only one timed challenge runs at a time.
  * - Daily check-off: pick a category and a name (BR-14).
  */
 @Component({
@@ -62,6 +63,8 @@ export class NewChallengePage {
   protected readonly kind = signal<ChallengeKind>(this.isWallSquatRunning ? 'checkoff' : 'timed');
   protected readonly targetSeconds = signal(DEFAULT_TARGET_SECONDS);
   protected readonly category = signal<CheckOffCategory>('reading');
+  /** Each kind keeps its own name, so switching kinds does not lose what was typed. */
+  protected readonly timedName = signal(WALL_SQUAT_NAME);
   protected readonly name = signal('');
   protected readonly isStarting = signal(false);
   protected readonly errorMessage = signal('');
@@ -72,7 +75,9 @@ export class NewChallengePage {
   );
 
   protected readonly canStart = computed(() =>
-    this.kind() === 'timed' ? !this.isWallSquatRunning : this.name().trim().length > 0,
+    this.kind() === 'timed'
+      ? !this.isWallSquatRunning && this.timedName().trim().length > 0
+      : this.name().trim().length > 0,
   );
 
   protected pickKind(kind: ChallengeKind): void {
@@ -96,7 +101,7 @@ export class NewChallengePage {
     this.errorMessage.set('');
     try {
       if (this.kind() === 'timed') {
-        await this.challengeStore.start(this.targetSeconds());
+        await this.challengeStore.start(this.targetSeconds(), this.timedName());
       } else {
         await this.checkOffStore.start({ name: this.name(), category: this.category() });
       }

@@ -51,8 +51,8 @@ export class ChallengeStore {
     return overview;
   }
 
-  async start(targetSeconds: number): Promise<void> {
-    await this.startChallenge.execute(targetSeconds);
+  async start(targetSeconds: number, name?: string): Promise<void> {
+    await this.startChallenge.execute(targetSeconds, name);
     this.savedNoticeState.set(null);
     await this.load();
   }

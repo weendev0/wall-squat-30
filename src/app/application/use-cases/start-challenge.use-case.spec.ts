@@ -17,6 +17,14 @@ describe('StartChallengeUseCase', () => {
     expect((await app.startChallenge.execute(75)).targetSeconds).toBe(75);
   });
 
+  it('is named "Wall squat" unless another name is given', async () => {
+    const app = createTestApp();
+    expect((await app.startChallenge.execute()).name).toBe('Wall squat');
+
+    const other = createTestApp();
+    expect((await other.startChallenge.execute(60, '  Plank ')).name).toBe('Plank');
+  });
+
   it('starts beside a running check-off challenge (BR-13)', async () => {
     const app = createTestApp();
     await app.startCheckOffChallenge.execute({ name: 'Atomic Habits', category: 'reading' });

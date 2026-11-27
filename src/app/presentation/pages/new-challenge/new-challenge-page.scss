@@ -81,3 +81,8 @@
 .start {
   background: var(--tone);
 }
+
+.timed-name {
+  display: flex;
+  flex-direction: column;
+}
