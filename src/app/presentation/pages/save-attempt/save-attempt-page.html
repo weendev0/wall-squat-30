@@ -1,0 +1,63 @@
+<main class="screen">
+  <p class="eyebrow">Day {{ draft.dayNumber }}</p>
+  <strong class="time">{{ draft.durationSeconds | duration }}</strong>
+
+  @if (isTooShort) {
+    <p class="muted result">Under {{ minimumSeconds }} seconds, so this one was not saved.</p>
+
+    <div class="actions">
+      <button type="button" class="button-primary" (click)="tryAgain()">Try again</button>
+      <button type="button" class="button-quiet" (click)="discard()">Back to Today</button>
+    </div>
+  } @else {
+    <p class="result" [class.reached]="reachedTarget">
+      @if (reachedTarget) {
+        Target {{ draft.targetSeconds | duration }} reached
+      } @else {
+        {{ draft.targetSeconds - draft.durationSeconds }}s short of the
+        {{ draft.targetSeconds | duration }} target
+      }
+    </p>
+
+    <section class="card details">
+      <h2 class="field-label" id="feeling-heading">How did it feel?</h2>
+      <div class="feelings" role="group" aria-labelledby="feeling-heading">
+        @for (option of feelings; track option.value) {
+          <button
+            type="button"
+            class="chip"
+            [attr.aria-pressed]="feeling() === option.value"
+            (click)="toggleFeeling(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+
+      <label>
+        <span class="field-label">Note (optional)</span>
+        <textarea
+          #noteField
+          class="text-field"
+          rows="2"
+          maxlength="200"
+          [value]="note()"
+          (input)="note.set(noteField.value)"
+        ></textarea>
+      </label>
+    </section>
+
+    @if (errorMessage()) {
+      <p class="error-text" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" class="button-primary" [disabled]="isSaving()" (click)="save()">
+        Save
+      </button>
+      <button type="button" class="button-quiet" [disabled]="isSaving()" (click)="discard()">
+        Discard
+      </button>
+    </div>
+  }
+</main>

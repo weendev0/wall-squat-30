@@ -1,0 +1,69 @@
+<main class="screen">
+  <p class="eyebrow">Wall Squat Challenge 30 Days</p>
+  <h1 class="screen-title">New challenge</h1>
+  <p class="muted">30 days, starting today, {{ startDateLabel }}</p>
+
+  <section class="card target" aria-labelledby="target-heading">
+    <h2 id="target-heading" class="field-label">Daily target</h2>
+
+    <div class="stepper">
+      <button type="button" class="chip" (click)="changeBy(-step)" aria-label="5 seconds less">
+        −5s
+      </button>
+      <output class="target-value" aria-live="polite">{{ targetSeconds() | duration }}</output>
+      <button type="button" class="chip" (click)="changeBy(step)" aria-label="5 seconds more">
+        +5s
+      </button>
+    </div>
+
+    <div class="fields">
+      <label>
+        <span class="field-label">Minutes</span>
+        <input
+          #minutesField
+          class="text-field"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          max="10"
+          [value]="minutes()"
+          (change)="setFromFields(minutesField.value, secondsField.value)"
+        />
+      </label>
+      <label>
+        <span class="field-label">Seconds</span>
+        <input
+          #secondsField
+          class="text-field"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          max="59"
+          [value]="seconds()"
+          (change)="setFromFields(minutesField.value, secondsField.value)"
+        />
+      </label>
+    </div>
+
+    <div class="presets">
+      @for (preset of presets; track preset) {
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="preset === targetSeconds()"
+          (click)="setTarget(preset)"
+        >
+          {{ preset | duration }}
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (errorMessage()) {
+    <p class="error-text" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <button type="button" class="button-primary start" [disabled]="isStarting()" (click)="start()">
+    Start challenge
+  </button>
+</main>
