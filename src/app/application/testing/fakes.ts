@@ -1,5 +1,12 @@
-import { Attempt, Challenge, LocalDate } from '../../domain';
-import { AttemptRepository, ChallengeRepository, Clock, IdGenerator } from '../ports';
+import { Attempt, Challenge, CountdownCue, LocalDate, TimerCue } from '../../domain';
+import {
+  AttemptRepository,
+  ChallengeRepository,
+  Clock,
+  IdGenerator,
+  ScreenWakeLock,
+  SoundPlayer,
+} from '../ports';
 
 /** In-memory stand-ins for the ports, so use cases can be tested without a browser. */
 
@@ -71,5 +78,36 @@ export class SequentialIdGenerator implements IdGenerator {
   newId(): string {
     this.counter++;
     return `id-${this.counter}`;
+  }
+}
+
+/** Remembers every beep instead of playing it. */
+export class FakeSoundPlayer implements SoundPlayer {
+  isUnlocked = false;
+  readonly played: (CountdownCue | TimerCue)[] = [];
+
+  async unlock(): Promise<void> {
+    this.isUnlocked = true;
+  }
+
+  playCountdown(cue: CountdownCue): void {
+    this.played.push(cue);
+  }
+
+  playTimerCue(cue: TimerCue): void {
+    this.played.push(cue);
+  }
+}
+
+/** Tells the test whether the screen would be kept on. */
+export class FakeScreenWakeLock implements ScreenWakeLock {
+  isHeld = false;
+
+  async acquire(): Promise<void> {
+    this.isHeld = true;
+  }
+
+  async release(): Promise<void> {
+    this.isHeld = false;
   }
 }

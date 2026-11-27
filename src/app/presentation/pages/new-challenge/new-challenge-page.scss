@@ -1,0 +1,33 @@
+.target {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.target-value {
+  font-size: 56px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.start {
+  margin-top: auto;
+}

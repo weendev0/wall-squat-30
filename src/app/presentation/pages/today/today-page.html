@@ -1,0 +1,79 @@
+@if (overview(); as overview) {
+  <main class="screen screen-in-tabs">
+    @if (today(); as today) {
+      <p class="eyebrow">Day {{ today.dayNumber }} of {{ challengeLength }}</p>
+      <h1 class="screen-title">Today</h1>
+
+      @if (savedNotice(); as notice) {
+        <div class="card notice" role="status">
+          <span>
+            Saved {{ notice.durationSeconds | duration }}.
+            @if (notice.isPersonalBest) {
+              <strong>New personal best!</strong>
+            }
+          </span>
+          <button type="button" class="button-quiet" (click)="dismissNotice()" aria-label="Close">
+            ✕
+          </button>
+        </div>
+      }
+
+      <section class="stats" aria-label="Your numbers">
+        <div class="card stat">
+          <span class="field-label">Streak</span>
+          <strong
+            >{{ overview.progress.currentStreak }}
+            {{ overview.progress.currentStreak === 1 ? 'day' : 'days' }}</strong
+          >
+        </div>
+        <div class="card stat">
+          <span class="field-label">Best hold</span>
+          <strong>{{ overview.progress.bestHoldSeconds | duration }}</strong>
+        </div>
+        <div class="card stat">
+          <span class="field-label">Completed</span>
+          <strong>{{ overview.progress.daysComplete }}/{{ challengeLength }}</strong>
+        </div>
+      </section>
+
+      <section class="card target">
+        <span class="field-label">Today's target</span>
+        <strong class="target-time">{{ overview.challenge.targetSeconds | duration }}</strong>
+        @if (today.attemptCount > 0) {
+          <p class="muted today-best">
+            @if (today.status === 'complete') {
+              ✓ Done.
+            }
+            Today's best {{ today.bestSeconds | duration }} · {{ today.attemptCount }}
+            {{ today.attemptCount === 1 ? 'attempt' : 'attempts' }}
+          </p>
+        }
+      </section>
+
+      <button type="button" class="button-primary start" (click)="startHold()">START</button>
+      <p class="muted hint">3-second countdown before the timer starts</p>
+
+      <section aria-labelledby="recent-heading">
+        <h2 id="recent-heading" class="field-label">Last 7 days</h2>
+        <ol class="recent">
+          @for (day of recentDays(); track day.dayNumber) {
+            <li
+              [class]="'day ' + day.status"
+              [attr.aria-label]="'Day ' + day.dayNumber + ', ' + day.status"
+            >
+              <span class="dot"></span>
+              <span>D{{ day.dayNumber }}</span>
+            </li>
+          }
+        </ol>
+      </section>
+    } @else {
+      <h1 class="screen-title">Challenge finished</h1>
+      <p class="muted">
+        You reached the target on {{ overview.progress.daysComplete }} of
+        {{ challengeLength }} days. Your history is kept.
+      </p>
+      <a class="button-primary link-button" routerLink="/new-challenge">Start a new challenge</a>
+    }
+  </main>
+}

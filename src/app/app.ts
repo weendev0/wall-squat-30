@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
-/** Root component. The tab bar and screens arrive in the next pull requests. */
+/** Root component: shows whichever screen the router picks (see app.routes.ts). */
 @Component({
   selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrl: './app.scss',
+  imports: [RouterOutlet],
+  template: '<router-outlet />',
 })
 export class App {}
