@@ -1,0 +1,17 @@
+.placeholder {
+  min-height: 100dvh;
+  padding: calc(env(safe-area-inset-top) + 48px) 20px 24px;
+  box-sizing: border-box;
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+}
