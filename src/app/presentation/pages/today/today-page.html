@@ -9,7 +9,9 @@
       <a class="round-link" routerLink="/settings" aria-label="Settings">⚙</a>
     </div>
   </div>
-  <p class="muted">{{ doneTodayLabel() }}</p>
+  @if (doneTodayLabel()) {
+    <p class="muted">{{ doneTodayLabel() }}</p>
+  }
 
   @if (savedNotice(); as notice) {
     <div class="card notice" role="status">
@@ -51,7 +53,7 @@
 
     @if (!wallSquatToday() && checkOffCards().length === 0) {
       <div class="card empty">
-        <p class="muted">No challenge is running right now.</p>
+        <p class="muted">No challenge is running yet. Start one and it shows up here.</p>
         <a class="button-primary empty-action" routerLink="/new-challenge">Start a new challenge</a>
       </div>
     }

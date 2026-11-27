@@ -9,8 +9,13 @@ describe('New challenge screen', () => {
     fakes = setUpApp('2026-11-27');
   });
 
-  it('opens first when there is no challenge yet', async () => {
-    const screen = await openScreen('/');
+  it('opens from the empty Today when there is no challenge yet', async () => {
+    const today = await openScreen('/');
+    expect(today.currentUrl()).toBe('/today');
+    expect(today.text()).toContain('No challenge is running yet.');
+
+    await today.click('Start a new challenge');
+    const screen = today;
 
     expect(screen.currentUrl()).toBe('/new-challenge');
     expect(screen.text()).toContain('30 days, starting today, Fri 27 Nov');

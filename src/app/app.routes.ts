@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import {
   loadChallenges,
+  loadChallengesCelebratingFirst,
   requireAttemptDraft,
   requireCelebration,
-  requireChallenge,
   requireChallengeDay,
   requireCheckOffCelebration,
   requireCheckOffDay,
@@ -71,7 +71,7 @@ export const routes: Routes = [
   {
     path: '',
     component: TabShell,
-    canActivate: [requireChallenge],
+    canActivate: [loadChallengesCelebratingFirst],
     children: [
       {
         path: 'today',

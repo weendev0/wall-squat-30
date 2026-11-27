@@ -53,7 +53,7 @@ describe('Settings screen', () => {
 
     expect(fakes.challenges.items.size).toBe(0);
     expect(fakes.attempts.items.size).toBe(0);
-    expect(screen.currentUrl()).toBe('/new-challenge');
+    expect(screen.currentUrl()).toBe('/today');
   });
 
   it('keeps everything on Cancel', async () => {

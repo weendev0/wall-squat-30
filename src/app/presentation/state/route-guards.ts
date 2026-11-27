@@ -10,10 +10,11 @@ import { CheckOffStore } from './check-off-store';
  */
 
 /**
- * Today, Progress and History need at least one challenge; without one the app opens
- * New challenge. Right after a challenge's day 30 its Celebration comes first (BR-10, BR-18).
+ * Loads every challenge before Today, Progress or History opens. The app always opens on
+ * Today, even with no challenge yet (it then shows an empty list with an add button).
+ * Right after a challenge's day 30 its Celebration comes first (BR-10, BR-18).
  */
-export const requireChallenge: CanActivateFn = async () => {
+export const loadChallengesCelebratingFirst: CanActivateFn = async () => {
   const router = inject(Router);
   const challengeStore = inject(ChallengeStore);
   const checkOffStore = inject(CheckOffStore);
@@ -26,9 +27,7 @@ export const requireChallenge: CanActivateFn = async () => {
   if (finished !== null) {
     return router.createUrlTree(['/celebration', finished.challenge.id]);
   }
-  // Finished check-off challenges count too, so their notes stay readable in History.
-  const hasAnyChallenge = wallSquat !== null || checkOffStore.overviews().length > 0;
-  return hasAnyChallenge ? true : router.createUrlTree(['/new-challenge']);
+  return true;
 };
 
 /** The Celebration screen only opens once, for a challenge that has just finished (BR-10). */

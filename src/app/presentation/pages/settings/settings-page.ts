@@ -60,6 +60,6 @@ export class SettingsPage implements OnInit {
   protected async reset(): Promise<void> {
     await this.store.resetHistory();
     this.isConfirmingReset.set(false);
-    await this.router.navigate(['/new-challenge']);
+    await this.router.navigate(['/today']);
   }
 }

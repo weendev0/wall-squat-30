@@ -89,6 +89,6 @@ describe('Progress and History of a check-off challenge', () => {
     expect(screen.text()).toContain('Chapter 1');
 
     await screen.click('Today');
-    expect(screen.text()).toContain('No challenge is running right now.');
+    expect(screen.text()).toContain('No challenge is running yet.');
   });
 });
