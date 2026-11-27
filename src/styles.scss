@@ -1,0 +1,21 @@
+// Dark Coral Calm design tokens (see the UI canvas). The app is always dark.
+:root {
+  color-scheme: dark;
+  --color-background: #121317;
+  --color-surface: #1e2026;
+  --color-border: #2a2c33;
+  --color-text-primary: #f5f4f0;
+  --color-text-secondary: #a9acb3;
+  --color-accent: #e4572e;
+  --color-accent-text: #ff8a66;
+  --color-on-accent: #121317;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
