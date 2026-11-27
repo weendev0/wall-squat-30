@@ -16,10 +16,14 @@ import {
   MarkCelebrationShownUseCase,
   RecordAttemptUseCase,
   ResetHistoryUseCase,
+  ScreenWakeLock,
+  SoundPlayer,
   StartChallengeUseCase,
 } from '../application';
+import { BrowserScreenWakeLock } from '../infrastructure/device/browser-screen-wake-lock';
 import { RandomIdGenerator } from '../infrastructure/device/random-id-generator';
 import { SystemClock } from '../infrastructure/device/system-clock';
+import { WebAudioSoundPlayer } from '../infrastructure/device/web-audio-sound-player';
 import { DexieAttemptRepository } from '../infrastructure/persistence/dexie-attempt-repository';
 import { DexieChallengeRepository } from '../infrastructure/persistence/dexie-challenge-repository';
 import { WallSquatDatabase } from '../infrastructure/persistence/wall-squat-database';
@@ -35,6 +39,8 @@ export const CHALLENGE_REPOSITORY = new InjectionToken<ChallengeRepository>('Cha
 export const ATTEMPT_REPOSITORY = new InjectionToken<AttemptRepository>('AttemptRepository');
 export const CLOCK = new InjectionToken<Clock>('Clock');
 export const ID_GENERATOR = new InjectionToken<IdGenerator>('IdGenerator');
+export const SOUND_PLAYER = new InjectionToken<SoundPlayer>('SoundPlayer');
+export const SCREEN_WAKE_LOCK = new InjectionToken<ScreenWakeLock>('ScreenWakeLock');
 
 export function provideWallSquat(): EnvironmentProviders {
   return makeEnvironmentProviders([
@@ -50,6 +56,8 @@ export function provideWallSquat(): EnvironmentProviders {
     },
     { provide: CLOCK, useFactory: () => new SystemClock() },
     { provide: ID_GENERATOR, useFactory: () => new RandomIdGenerator() },
+    { provide: SOUND_PLAYER, useFactory: () => new WebAudioSoundPlayer() },
+    { provide: SCREEN_WAKE_LOCK, useFactory: () => new BrowserScreenWakeLock() },
 
     // Use cases
     {

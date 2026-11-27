@@ -1,0 +1,28 @@
+<main class="screen timer-screen">
+  <header class="top">
+    <p class="eyebrow">Day {{ dayNumber }} · Wall squat</p>
+    <span class="awake-badge">Screen stays on</span>
+  </header>
+
+  <app-progress-ring class="ring" [progress]="ringProgress()">
+    @if (timer.phase() === 'countdown') {
+      <span class="label">Get ready</span>
+      <strong class="clock" aria-live="assertive">{{ timer.countdownSecondsLeft() }}</strong>
+    } @else {
+      <strong class="clock" role="timer">{{ timer.elapsedSeconds() | duration }}</strong>
+      <span class="label">{{ targetMessage() }}</span>
+    }
+  </app-progress-ring>
+
+  <p class="muted tip">Hold steady. Thighs parallel.</p>
+  <p class="muted tip small">
+    Beep at 0:30, ticks in the last 3 seconds, then a final beep. The timer keeps counting.
+  </p>
+
+  <div class="actions">
+    @if (timer.phase() !== 'countdown') {
+      <button type="button" class="button-primary stop" (click)="stop()">STOP</button>
+    }
+    <button type="button" class="button-quiet" (click)="cancel()">Cancel attempt</button>
+  </div>
+</main>

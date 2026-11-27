@@ -9,7 +9,14 @@ import {
   ResetHistoryUseCase,
   StartChallengeUseCase,
 } from '../application';
-import { provideWallSquat, WALL_SQUAT_DATABASE } from './provide-wall-squat';
+import { BrowserScreenWakeLock } from '../infrastructure/device/browser-screen-wake-lock';
+import { WebAudioSoundPlayer } from '../infrastructure/device/web-audio-sound-player';
+import {
+  provideWallSquat,
+  SCREEN_WAKE_LOCK,
+  SOUND_PLAYER,
+  WALL_SQUAT_DATABASE,
+} from './provide-wall-squat';
 
 describe('provideWallSquat', () => {
   beforeEach(() => {
@@ -32,6 +39,11 @@ describe('provideWallSquat', () => {
 
   it.each(useCases)('provides %o', (useCase) => {
     expect(TestBed.inject(useCase)).toBeInstanceOf(useCase);
+  });
+
+  it('provides the sound and screen-awake services of the browser', () => {
+    expect(TestBed.inject(SOUND_PLAYER)).toBeInstanceOf(WebAudioSoundPlayer);
+    expect(TestBed.inject(SCREEN_WAKE_LOCK)).toBeInstanceOf(BrowserScreenWakeLock);
   });
 
   it('wires the use cases to real storage end to end', async () => {

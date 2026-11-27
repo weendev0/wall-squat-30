@@ -1,0 +1,94 @@
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-color: var(--color-accent);
+
+  .button-quiet {
+    min-height: 32px;
+    padding: 0 8px;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stat strong {
+  font-size: 20px;
+}
+
+.target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.target-time {
+  font-size: 56px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-best {
+  margin-top: 4px;
+}
+
+.start {
+  min-height: 72px;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+
+.hint {
+  margin-top: -8px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.recent {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
+  display: flex;
+  flex: 0 0 calc((100% - 6 * 8px) / 7); // always 7 columns, so the days line up from the left
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+}
+
+.dot {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.complete .dot {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.under-target .dot {
+  border-color: var(--color-accent);
+}
+
+.pending .dot {
+  border: 2px dashed var(--color-accent);
+}
+
+.link-button {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
