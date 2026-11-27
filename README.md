@@ -19,11 +19,18 @@ npm run build        # production build in dist/
 
 The app follows clean architecture: the business rules know nothing about Angular or the browser.
 
-| Folder | What lives there |
-| --- | --- |
-| `src/app/domain` | The challenge rules (BR-01 to BR-12 in the spec), as plain TypeScript functions with unit tests next to each file |
-| `src/app/application` | Use cases such as "save attempt" and the interfaces (ports) they need *(next pull request)* |
-| `src/app/infrastructure` | IndexedDB storage, sounds, screen wake lock *(coming)* |
-| `src/app/presentation` | Angular screens *(coming)* |
+| Folder                   | What lives there                                                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `src/app/domain`         | The challenge rules (BR-01 to BR-12 in the spec), as plain TypeScript functions with unit tests next to each file |
+| `src/app/application`    | Use cases such as `RecordAttemptUseCase`, and the interfaces (ports) they need: repositories, clock, id generator |
+| `src/app/infrastructure` | IndexedDB storage through Dexie, the system clock and id generator (sounds and screen wake lock coming)           |
+| `src/app/composition`    | The one place that connects each port to its real class, for Angular dependency injection                         |
+| `src/app/presentation`   | Angular screens _(coming)_                                                                                        |
 
 Every rule function has a comment with the rule ID it implements, for example `BR-06` for the streak.
+
+## Keeping data through updates
+
+Data lives in IndexedDB on the phone, in the database defined in
+`src/app/infrastructure/persistence/wall-squat-database.ts`. Never edit an existing
+`version(n)` block there: add a new version with an upgrade step and a test.
