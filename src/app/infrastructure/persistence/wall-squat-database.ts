@@ -1,5 +1,10 @@
 import Dexie, { EntityTable } from 'dexie';
-import { Attempt, Challenge, CheckIn, WALL_SQUAT_NAME } from '../../domain';
+import { Attempt, Challenge, CheckIn, TimedCategory, WALL_SQUAT_NAME } from '../../domain';
+
+/** A saved timed category with its position, so the picker keeps the order they were added. */
+export interface StoredTimedCategory extends TimedCategory {
+  readonly order: number;
+}
 
 /** Never change this name: a new name means a new, empty database on the phone. */
 export const DATABASE_NAME = 'wall-squat-30';
@@ -19,6 +24,7 @@ export class WallSquatDatabase extends Dexie {
   challenges!: EntityTable<Challenge, 'id'>;
   attempts!: EntityTable<Attempt, 'id'>;
   checkIns!: EntityTable<CheckIn, 'id'>;
+  timedCategories!: EntityTable<StoredTimedCategory, 'id'>;
 
   constructor(name: string = DATABASE_NAME) {
     super(name);
@@ -42,6 +48,12 @@ export class WallSquatDatabase extends Dexie {
           .toCollection()
           .modify((challenge) => upgradeChallengeToVersion2(challenge)),
       );
+
+    // Version 3 (timed categories, BR-15): a new table for the categories the user adds,
+    // such as Plank. Nothing else changes, so no upgrade step is needed.
+    this.version(3).stores({
+      timedCategories: 'id, order',
+    });
   }
 }
 

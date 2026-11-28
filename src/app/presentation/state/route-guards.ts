@@ -18,35 +18,30 @@ export const loadChallengesCelebratingFirst: CanActivateFn = async () => {
   const router = inject(Router);
   const challengeStore = inject(ChallengeStore);
   const checkOffStore = inject(CheckOffStore);
-  const [wallSquat] = await Promise.all([challengeStore.load(), checkOffStore.load()]);
+  await Promise.all([challengeStore.load(), checkOffStore.load()]);
 
-  if (wallSquat?.needsCelebration) {
-    return router.createUrlTree(['/celebration']);
-  }
-  const finished = checkOffStore.awaitingCelebration();
+  const finished = challengeStore.awaitingCelebration() ?? checkOffStore.awaitingCelebration();
   if (finished !== null) {
     return router.createUrlTree(['/celebration', finished.challenge.id]);
   }
   return true;
 };
 
-/** The Celebration screen only opens once, for a challenge that has just finished (BR-10). */
-export const requireCelebration: CanActivateFn = async () => {
+/**
+ * The Celebration screen only opens once, for a challenge that has just finished:
+ * timed (BR-10) or check-off (BR-18).
+ */
+export const requireCelebration: CanActivateFn = async (route: ActivatedRouteSnapshot) => {
   const router = inject(Router);
-  const overview = await inject(ChallengeStore).load();
+  const challengeStore = inject(ChallengeStore);
+  const checkOffStore = inject(CheckOffStore);
+  await Promise.all([challengeStore.load(), checkOffStore.load()]);
+  const id = challengeIdOf(route);
+  const overview = challengeStore.find(id) ?? checkOffStore.find(id);
   return overview?.needsCelebration ? true : router.createUrlTree(['/today']);
 };
 
-/** BR-18: a finished check-off challenge's celebration, shown once. */
-export const requireCheckOffCelebration: CanActivateFn = async (route: ActivatedRouteSnapshot) => {
-  const router = inject(Router);
-  const store = inject(CheckOffStore);
-  await store.load();
-  const overview = store.find(route.paramMap.get('challengeId') ?? '');
-  return overview?.needsCelebration ? true : router.createUrlTree(['/today']);
-};
-
-/** New challenge needs both stores loaded, to know whether a wall squat is already running. */
+/** New challenge needs both stores loaded, to know which categories are already running. */
 export const loadChallenges: CanActivateFn = async () => {
   const challengeStore = inject(ChallengeStore);
   const checkOffStore = inject(CheckOffStore);
@@ -59,14 +54,16 @@ export const requireCheckOffDay: CanActivateFn = async (route: ActivatedRouteSna
   const router = inject(Router);
   const store = inject(CheckOffStore);
   await store.load();
-  const overview = store.find(route.paramMap.get('challengeId') ?? '');
+  const overview = store.find(challengeIdOf(route));
   return overview?.todayDayNumber ? true : router.createUrlTree(['/today']);
 };
 
-/** The timer needs a challenge day to record into. */
-export const requireChallengeDay: CanActivateFn = async () => {
+/** The timer and Add attempt need a running timed challenge with a day to record into. */
+export const requireChallengeDay: CanActivateFn = async (route: ActivatedRouteSnapshot) => {
   const router = inject(Router);
-  const overview = await inject(ChallengeStore).load();
+  const store = inject(ChallengeStore);
+  await store.load();
+  const overview = store.find(challengeIdOf(route));
   return overview?.todayDayNumber ? true : router.createUrlTree(['/today']);
 };
 
@@ -75,3 +72,8 @@ export const requireAttemptDraft: CanActivateFn = () => {
   const hasDraft = inject(AttemptDraftStore).draft() !== null;
   return hasDraft ? true : inject(Router).createUrlTree(['/today']);
 };
+
+/** The :challengeId part of the address. */
+export function challengeIdOf(route: ActivatedRouteSnapshot): string {
+  return route.paramMap.get('challengeId') ?? '';
+}

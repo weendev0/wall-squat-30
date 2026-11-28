@@ -1,16 +1,17 @@
 import {
   createTimedChallenge,
   DEFAULT_TARGET_SECONDS,
-  WALL_SQUAT_NAME,
   DomainError,
   TimedChallenge,
+  WALL_SQUAT_NAME,
 } from '../../domain';
 import { ChallengeRepository, Clock, IdGenerator } from '../ports';
-import { findActiveTimedChallenge } from './find-active-timed-challenge';
+import { findRunningInCategory } from './find-running-timed-challenges';
 
 /**
- * BR-01, BR-02: starts a new 30-day wall squat challenge today with the chosen daily target.
- * Check-off challenges may run beside it (BR-13), but only one timed challenge at a time.
+ * BR-01, BR-02: starts a new 30-day timed challenge today with the chosen daily target.
+ * BR-15, BR-16: the category is its name; several categories may run at once,
+ * but only one challenge per category.
  */
 export class StartChallengeUseCase {
   constructor(
@@ -21,21 +22,22 @@ export class StartChallengeUseCase {
 
   async execute(
     targetSeconds: number = DEFAULT_TARGET_SECONDS,
-    name: string = WALL_SQUAT_NAME,
+    category: string = WALL_SQUAT_NAME,
   ): Promise<TimedChallenge> {
-    const active = await findActiveTimedChallenge(this.challenges);
-    if (active !== null) {
-      throw new DomainError(
-        'A timed challenge is already running. Finish it before starting a new one.',
-      );
-    }
-
     const challenge = createTimedChallenge({
       id: this.ids.newId(),
       startDate: this.clock.today(),
       targetSeconds,
-      name,
+      name: category,
     });
+
+    const running = await findRunningInCategory(this.challenges, challenge.name);
+    if (running !== null) {
+      throw new DomainError(
+        `A ${running.name} challenge is already running. Finish it before starting a new one.`,
+      );
+    }
+
     await this.challenges.save(challenge);
     return challenge;
   }

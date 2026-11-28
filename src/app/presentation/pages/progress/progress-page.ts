@@ -4,7 +4,7 @@ import { CHALLENGE_LENGTH_DAYS, DayResult, DayStatus, formatDuration } from '../
 import { DurationPipe } from '../../shared/duration.pipe';
 import { shortDateLabel } from '../../shared/date-label';
 import { ChallengeTabs, selectedChallenge } from '../../shared/challenge-tabs';
-import { ChallengeStore } from '../../state/challenge-store';
+import { ChallengeStore, todayResult } from '../../state/challenge-store';
 import { CheckOffStore } from '../../state/check-off-store';
 import { CheckOffProgress } from './check-off-progress';
 
@@ -49,13 +49,17 @@ export class ProgressPage {
   protected readonly checkOffs = inject(CheckOffStore).active;
   protected readonly selected = selectedChallenge(
     this.challenge,
-    this.store.overview,
+    this.store.active,
     this.checkOffs,
   );
 
   protected readonly challengeLength = CHALLENGE_LENGTH_DAYS;
-  protected readonly overview = this.store.overview;
-  protected readonly today = this.store.today;
+  /** The selected timed challenge; check-off challenges show CheckOffProgress instead. */
+  protected readonly overview = this.selected.timed;
+  protected readonly today = computed(() => {
+    const overview = this.overview();
+    return overview ? todayResult(overview) : null;
+  });
 
   protected readonly startedLabel = computed(() => {
     const startDate = this.overview()?.challenge.startDate;

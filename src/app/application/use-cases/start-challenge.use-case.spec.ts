@@ -17,9 +17,9 @@ describe('StartChallengeUseCase', () => {
     expect((await app.startChallenge.execute(75)).targetSeconds).toBe(75);
   });
 
-  it('is named "Wall squat" unless another name is given', async () => {
+  it('is named "Wall Squat" unless another name is given', async () => {
     const app = createTestApp();
-    expect((await app.startChallenge.execute()).name).toBe('Wall squat');
+    expect((await app.startChallenge.execute()).name).toBe('Wall Squat');
 
     const other = createTestApp();
     expect((await other.startChallenge.execute(60, '  Plank ')).name).toBe('Plank');
@@ -32,10 +32,20 @@ describe('StartChallengeUseCase', () => {
     await expect(app.startChallenge.execute()).resolves.toMatchObject({ kind: 'timed' });
   });
 
-  it('refuses a second wall squat challenge while one is running', async () => {
+  it('BR-16: refuses a second challenge in the same category while one is running', async () => {
     const app = createTestApp();
     await app.startChallenge.execute();
 
     await expect(app.startChallenge.execute()).rejects.toThrow(DomainError);
+  });
+
+  it('BR-16: runs other categories beside it, and spots the same name in any case', async () => {
+    const app = createTestApp();
+    await app.startChallenge.execute(60, 'Wall Squat');
+
+    await expect(app.startChallenge.execute(45, 'Plank')).resolves.toMatchObject({ name: 'Plank' });
+    await expect(app.startChallenge.execute(60, 'wall squat')).rejects.toThrow(
+      'A Wall Squat challenge is already running',
+    );
   });
 });

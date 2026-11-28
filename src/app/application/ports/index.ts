@@ -6,3 +6,4 @@ export * from './id-generator';
 export * from './screen-wake-lock';
 export * from './sound-player';
 export * from './file-sharer';
+export * from './timed-category-repository';

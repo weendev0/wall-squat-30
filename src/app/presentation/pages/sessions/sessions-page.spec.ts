@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  GetChallengeOverviewUseCase,
+  GetTimedOverviewsUseCase,
   StartChallengeUseCase,
   RecordAttemptUseCase,
 } from '../../../application';
@@ -33,7 +33,7 @@ describe('All sessions screen', () => {
     const [day3, day1] = dayCards(screen);
 
     expect(screen.text()).toContain(
-      'Started Mon 16 Nov · target 1:00 · 3 attempts over 2 days · 1 missed',
+      'Wall Squat · started Mon 16 Nov · target 1:00 · 3 attempts over 2 days · 1 missed',
     );
     expect(day3.textContent).toContain('Day 3 · Wed 18 Nov');
     expect(day3.textContent).toContain('made up on Thu 19 Nov · added by hand');
@@ -63,21 +63,25 @@ describe('All sessions screen', () => {
 
     expect([...fakes.attempts.items.values()].map((a) => a.durationSeconds)).toEqual([41]);
     expect(screen.text()).toContain('Best 0:41');
-    const overview = await TestBed.inject(GetChallengeOverviewUseCase).execute();
-    expect(overview?.days[0].status).toBe('under-target');
+    const [overview] = await TestBed.inject(GetTimedOverviewsUseCase).execute();
+    expect(overview.days[0].status).toBe('under-target');
   });
 
-  it('filters between this challenge, past challenges and all time', async () => {
+  it('filters between running challenges, past challenges and all time', async () => {
     await createChallengeHistory(fakes, [{ dayNumber: 2, durationSeconds: 62 }], 31);
-    await TestBed.inject(GetChallengeOverviewUseCase).execute(); // finishes the first challenge
-    await TestBed.inject(StartChallengeUseCase).execute(90);
-    await TestBed.inject(RecordAttemptUseCase).execute({ durationSeconds: 95, source: 'timer' });
+    await TestBed.inject(GetTimedOverviewsUseCase).execute(); // finishes the first challenge
+    const second = await TestBed.inject(StartChallengeUseCase).execute(90);
+    await TestBed.inject(RecordAttemptUseCase).execute({
+      challengeId: second.id,
+      durationSeconds: 95,
+      source: 'timer',
+    });
 
     const screen = await openScreen('/sessions?filter=past');
     expect(screen.text()).toContain('target 1:00');
     expect(screen.text()).not.toContain('target 1:30');
 
-    await screen.click('This challenge');
+    await screen.click('Running');
     expect(screen.text()).toContain('target 1:30');
     expect(screen.text()).not.toContain('target 1:00');
 

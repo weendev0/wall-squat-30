@@ -7,6 +7,7 @@ import {
   InMemoryAttemptRepository,
   InMemoryChallengeRepository,
   InMemoryCheckInRepository,
+  InMemoryTimedCategoryRepository,
   SequentialIdGenerator,
 } from '../../application/testing/fakes';
 import {
@@ -19,6 +20,7 @@ import {
   provideWallSquat,
   SCREEN_WAKE_LOCK,
   SOUND_PLAYER,
+  TIMED_CATEGORY_REPOSITORY,
 } from '../provide-wall-squat';
 
 /**
@@ -31,6 +33,7 @@ export function provideWallSquatTesting(today = '2026-11-16') {
     challenges: new InMemoryChallengeRepository(),
     attempts: new InMemoryAttemptRepository(),
     checkIns: new InMemoryCheckInRepository(),
+    categories: new InMemoryTimedCategoryRepository(),
     clock: new FakeClock(today),
     ids: new SequentialIdGenerator(),
     sound: new FakeSoundPlayer(),
@@ -43,6 +46,7 @@ export function provideWallSquatTesting(today = '2026-11-16') {
     { provide: CHALLENGE_REPOSITORY, useValue: fakes.challenges },
     { provide: ATTEMPT_REPOSITORY, useValue: fakes.attempts },
     { provide: CHECK_IN_REPOSITORY, useValue: fakes.checkIns },
+    { provide: TIMED_CATEGORY_REPOSITORY, useValue: fakes.categories },
     { provide: CLOCK, useValue: fakes.clock },
     { provide: ID_GENERATOR, useValue: fakes.ids },
     { provide: SOUND_PLAYER, useValue: fakes.sound },

@@ -82,7 +82,26 @@
   background: var(--tone);
 }
 
-.timed-name {
+.timed-category {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.add-row {
+  display: flex;
+  gap: 8px;
+
+  .text-field {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.add-category {
+  border-style: dashed;
+}
+
+.timed-category .chip:disabled {
+  opacity: 0.55;
 }

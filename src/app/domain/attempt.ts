@@ -9,7 +9,7 @@ export type AttemptSource = 'timer' | 'manual';
 
 export type Feeling = 'easy' | 'solid' | 'tough' | 'none';
 
-/** One wall squat hold. A day can have many attempts (BR-03). */
+/** One timed hold, such as a wall squat or a plank. A day can have many attempts (BR-03). */
 export interface Attempt {
   readonly id: string;
   readonly challengeId: string;

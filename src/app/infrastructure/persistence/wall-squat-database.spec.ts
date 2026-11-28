@@ -53,12 +53,39 @@ describe('WallSquatDatabase upgrades', () => {
 
     expect(challenge).toEqual({
       ...oldChallenge,
-      name: 'Wall squat',
+      name: 'Wall Squat',
       kind: 'timed',
       category: 'exercise',
     });
     expect(attempts).toEqual([oldAttempt]);
     expect(await upgraded.checkIns.count()).toBe(0);
+    upgraded.close();
+  });
+
+  it('version 2 to 3: keeps every challenge and adds an empty categories table', async () => {
+    const version2 = new Dexie(name);
+    version2
+      .version(1)
+      .stores({ challenges: 'id, status, startDate', attempts: 'id, challengeId' });
+    version2.version(2).stores({ checkIns: 'id, challengeId, &[challengeId+dayNumber]' });
+    const oldChallenge = {
+      id: 'c1',
+      name: 'Wall squat',
+      kind: 'timed',
+      category: 'exercise',
+      startDate: '2026-11-16',
+      targetSeconds: 60,
+      status: 'active',
+      completedOn: null,
+      celebrationShown: false,
+    };
+    await version2.table('challenges').put(oldChallenge);
+    version2.close();
+
+    const upgraded = new WallSquatDatabase(name);
+
+    expect(await new DexieChallengeRepository(upgraded).findById('c1')).toEqual(oldChallenge);
+    expect(await upgraded.timedCategories.count()).toBe(0);
     upgraded.close();
   });
 });
