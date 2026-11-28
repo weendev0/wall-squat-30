@@ -37,7 +37,7 @@ import { filter } from 'rxjs';
       background: var(--color-surface);
       border: 1px solid var(--color-border);
       color: var(--color-text-primary);
-      box-shadow: 0 6px 20px rgb(0 0 0 / 40%);
+      box-shadow: 0 6px 20px rgb(0 0 0 / 25%);
     }
     button {
       border: 0;

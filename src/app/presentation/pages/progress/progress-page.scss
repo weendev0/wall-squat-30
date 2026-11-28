@@ -136,12 +136,12 @@
 
 .missed {
   background: var(--color-missed);
-  color: #c9ccd2;
+  color: var(--color-missed-text);
 }
 
 .upcoming,
 .pending {
-  border: 1.5px dashed #5a5d66;
+  border: 1.5px dashed var(--color-dashed);
   color: var(--color-text-secondary);
 }
 

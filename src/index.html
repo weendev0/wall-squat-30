@@ -5,10 +5,27 @@
     <title>30 Days Challenges</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#121317" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#fff6f0" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script>
+      // Apply the saved look (cute or dark) before the first paint, so the screen never flashes.
+      // ThemeStore keeps it in sync after start. Key and default match theme-store.ts.
+      (function () {
+        var theme = 'cute';
+        try {
+          if (localStorage.getItem('30dc-theme') === 'dark') theme = 'dark';
+        } catch (e) {}
+        document.documentElement.dataset.theme = theme;
+        if (theme === 'dark') {
+          document
+            .querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+            .setAttribute('content', 'black-translucent');
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#121317');
+        }
+      })();
+    </script>
     <meta name="apple-mobile-web-app-title" content="30 Days" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="apple-touch-icon" href="icons/icon-180x180.png" />
