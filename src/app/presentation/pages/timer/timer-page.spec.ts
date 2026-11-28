@@ -5,25 +5,26 @@ import { openScreen, setUpApp } from '../../testing/screen-test-helpers';
 
 describe('Timer screen', () => {
   let fakes: ReturnType<typeof setUpApp>;
+  let challengeId: string;
 
   beforeEach(async () => {
     // Only the timer's own clock is faked; Angular keeps its real timers for rendering.
     vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] });
     fakes = setUpApp('2026-11-16');
-    await TestBed.inject(StartChallengeUseCase).execute(60);
+    challengeId = (await TestBed.inject(StartChallengeUseCase).execute(60)).id;
   });
 
   afterEach(() => vi.useRealTimers());
 
   async function openTimerAndHold(seconds: number) {
-    const screen = await openScreen('/timer');
+    const screen = await openScreen(`/timer/${challengeId}`);
     vi.advanceTimersByTime(3000 + seconds * 1000);
     await screen.harness.fixture.whenStable();
     return screen;
   }
 
   it('keeps the screen on and counts down before timing', async () => {
-    const screen = await openScreen('/timer');
+    const screen = await openScreen(`/timer/${challengeId}`);
 
     expect(fakes.wakeLock.isHeld).toBe(true);
     expect(screen.text()).toContain('Get ready 3');
@@ -50,6 +51,7 @@ describe('Timer screen', () => {
     await screen.click('STOP');
 
     expect(TestBed.inject(AttemptDraftStore).draft()).toEqual({
+      challengeId,
       durationSeconds: 61,
       dayNumber: 1,
       targetSeconds: 60,

@@ -80,10 +80,10 @@ describe('challenge', () => {
   });
 
   describe('BR-13: two kinds of challenge', () => {
-    it('makes a timed challenge an exercise called Wall squat by default', () => {
+    it('makes a timed challenge an exercise called Wall Squat by default', () => {
       const challenge = aChallenge();
 
-      expect(challenge).toMatchObject({ kind: 'timed', category: 'exercise', name: 'Wall squat' });
+      expect(challenge).toMatchObject({ kind: 'timed', category: 'exercise', name: 'Wall Squat' });
       expect(isTimedChallenge(challenge)).toBe(true);
       expect(isCheckOffChallenge(challenge)).toBe(false);
     });

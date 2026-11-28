@@ -6,6 +6,7 @@ import {
   provideAppInitializer,
 } from '@angular/core';
 import {
+  AddTimedCategoryUseCase,
   AttemptRepository,
   ChallengeRepository,
   CheckInRepository,
@@ -14,9 +15,10 @@ import {
   DeleteAttemptUseCase,
   ExportHistoryCsvUseCase,
   FileSharer,
-  GetChallengeOverviewUseCase,
   GetCheckOffOverviewsUseCase,
   GetSessionHistoryUseCase,
+  GetTimedCategoriesUseCase,
+  GetTimedOverviewsUseCase,
   IdGenerator,
   MarkCelebrationShownUseCase,
   RecordAttemptUseCase,
@@ -25,6 +27,7 @@ import {
   SoundPlayer,
   StartChallengeUseCase,
   StartCheckOffChallengeUseCase,
+  TimedCategoryRepository,
   UndoCheckInUseCase,
 } from '../application';
 import { BrowserFileSharer } from '../infrastructure/device/browser-file-sharer';
@@ -35,6 +38,7 @@ import { WebAudioSoundPlayer } from '../infrastructure/device/web-audio-sound-pl
 import { DexieAttemptRepository } from '../infrastructure/persistence/dexie-attempt-repository';
 import { DexieChallengeRepository } from '../infrastructure/persistence/dexie-challenge-repository';
 import { DexieCheckInRepository } from '../infrastructure/persistence/dexie-check-in-repository';
+import { DexieTimedCategoryRepository } from '../infrastructure/persistence/dexie-timed-category-repository';
 import { WallSquatDatabase } from '../infrastructure/persistence/wall-squat-database';
 
 /**
@@ -47,6 +51,9 @@ export const WALL_SQUAT_DATABASE = new InjectionToken<WallSquatDatabase>('WallSq
 export const CHALLENGE_REPOSITORY = new InjectionToken<ChallengeRepository>('ChallengeRepository');
 export const ATTEMPT_REPOSITORY = new InjectionToken<AttemptRepository>('AttemptRepository');
 export const CHECK_IN_REPOSITORY = new InjectionToken<CheckInRepository>('CheckInRepository');
+export const TIMED_CATEGORY_REPOSITORY = new InjectionToken<TimedCategoryRepository>(
+  'TimedCategoryRepository',
+);
 export const CLOCK = new InjectionToken<Clock>('Clock');
 export const ID_GENERATOR = new InjectionToken<IdGenerator>('IdGenerator');
 export const SOUND_PLAYER = new InjectionToken<SoundPlayer>('SoundPlayer');
@@ -69,6 +76,10 @@ export function provideWallSquat(): EnvironmentProviders {
       provide: CHECK_IN_REPOSITORY,
       useFactory: () => new DexieCheckInRepository(inject(WALL_SQUAT_DATABASE)),
     },
+    {
+      provide: TIMED_CATEGORY_REPOSITORY,
+      useFactory: () => new DexieTimedCategoryRepository(inject(WALL_SQUAT_DATABASE)),
+    },
     { provide: CLOCK, useFactory: () => new SystemClock() },
     { provide: ID_GENERATOR, useFactory: () => new RandomIdGenerator() },
     { provide: SOUND_PLAYER, useFactory: () => new WebAudioSoundPlayer() },
@@ -86,9 +97,9 @@ export function provideWallSquat(): EnvironmentProviders {
         ),
     },
     {
-      provide: GetChallengeOverviewUseCase,
+      provide: GetTimedOverviewsUseCase,
       useFactory: () =>
-        new GetChallengeOverviewUseCase(
+        new GetTimedOverviewsUseCase(
           inject(CHALLENGE_REPOSITORY),
           inject(ATTEMPT_REPOSITORY),
           inject(CLOCK),
@@ -128,7 +139,17 @@ export function provideWallSquat(): EnvironmentProviders {
           inject(CHALLENGE_REPOSITORY),
           inject(ATTEMPT_REPOSITORY),
           inject(CHECK_IN_REPOSITORY),
+          inject(TIMED_CATEGORY_REPOSITORY),
         ),
+    },
+    {
+      provide: GetTimedCategoriesUseCase,
+      useFactory: () => new GetTimedCategoriesUseCase(inject(TIMED_CATEGORY_REPOSITORY)),
+    },
+    {
+      provide: AddTimedCategoryUseCase,
+      useFactory: () =>
+        new AddTimedCategoryUseCase(inject(TIMED_CATEGORY_REPOSITORY), inject(ID_GENERATOR)),
     },
     {
       provide: StartCheckOffChallengeUseCase,

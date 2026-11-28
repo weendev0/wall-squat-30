@@ -44,27 +44,6 @@ describe('New challenge screen', () => {
     expect(screen.currentUrl()).toBe('/today');
   });
 
-  it('names a timed challenge "Wall squat" unless another name is typed', async () => {
-    const screen = await openScreen('/new-challenge');
-    const name = timedNameField(screen);
-    expect(name.value).toBe('Wall squat');
-
-    await typeName(screen, name, '  Plank  ');
-    await screen.click('Start challenge');
-
-    const [challenge] = await fakes.challenges.findAll();
-    expect(challenge).toMatchObject({ kind: 'timed', name: 'Plank' });
-    expect(screen.text()).toContain('Plank');
-  });
-
-  it('needs a name before a timed challenge can start', async () => {
-    const screen = await openScreen('/new-challenge');
-
-    await typeName(screen, timedNameField(screen), '   ');
-
-    expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
-  });
-
   it('takes a target typed as minutes and seconds', async () => {
     const screen = await openScreen('/new-challenge');
     const [minutes, seconds] =
@@ -78,21 +57,6 @@ describe('New challenge screen', () => {
     await screen.harness.fixture.whenStable();
 
     expect(screen.text()).toContain('2:15');
-  });
-
-  it('offers only a check-off while a wall squat is running', async () => {
-    await TestBed.inject(StartChallengeUseCase).execute(60);
-
-    const screen = await openScreen('/new-challenge');
-    expect(
-      screen
-        .button('Daily check-off Tap Done once a day, with a note')
-        .getAttribute('aria-checked'),
-    ).toBe('true');
-
-    await screen.click('Timed Hold for a target time, like the wall squat');
-    expect(screen.text()).toContain('A timed challenge is already running.');
-    expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('BR-13: starts a Reading challenge with its name and opens Today', async () => {
@@ -117,16 +81,68 @@ describe('New challenge screen', () => {
     expect(screen.currentUrl()).toBe('/today');
     expect(screen.text()).toContain('Angular signals');
   });
+
+  it('BR-15: offers Wall Squat first and starts it by default', async () => {
+    const screen = await openScreen('/new-challenge');
+
+    expect(screen.button('Wall Squat').getAttribute('aria-pressed')).toBe('true');
+    await screen.click('Start challenge');
+
+    const [challenge] = await fakes.challenges.findAll();
+    expect(challenge).toMatchObject({ kind: 'timed', name: 'Wall Squat' });
+  });
+
+  it('BR-15: adds a category, picks it and keeps it for next time', async () => {
+    const screen = await openScreen('/new-challenge');
+
+    await addCategory(screen, '  Plank ');
+
+    expect(screen.button('Plank').getAttribute('aria-pressed')).toBe('true');
+    expect(fakes.categories.items.map((category) => category.name)).toEqual(['Plank']);
+    await screen.click('Start challenge');
+    const [challenge] = await fakes.challenges.findAll();
+    expect(challenge).toMatchObject({ kind: 'timed', name: 'Plank' });
+
+    await screen.harness.navigateByUrl('/new-challenge');
+    await screen.harness.fixture.whenStable();
+    expect(screen.hasButton('Plank · running')).toBe(true);
+  });
+
+  it('BR-16: a running category cannot start again, but another one can', async () => {
+    await TestBed.inject(StartChallengeUseCase).execute(60);
+
+    const screen = await openScreen('/new-challenge');
+    expect((screen.button('Wall Squat · running') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
+
+    await addCategory(screen, 'Plank');
+    await screen.click('Start challenge');
+
+    const names = (await fakes.challenges.findAll()).map((challenge) => challenge.name);
+    expect(names).toContain('Plank');
+    expect(screen.currentUrl()).toBe('/today');
+  });
+
+  it('BR-16: says so when the added category is already running', async () => {
+    await TestBed.inject(StartChallengeUseCase).execute(60);
+    const screen = await openScreen('/new-challenge');
+
+    await addCategory(screen, 'wall squat');
+
+    expect(screen.text()).toContain('Wall Squat is already running. Pick another category.');
+    expect((screen.button('Start challenge') as HTMLButtonElement).disabled).toBe(true);
+  });
 });
 
 type Screen = Awaited<ReturnType<typeof openScreen>>;
 
-function timedNameField(screen: Screen): HTMLInputElement {
-  return screen.harness.routeNativeElement!.querySelector('.timed-name input')!;
-}
-
-async function typeName(screen: Screen, field: HTMLInputElement, text: string): Promise<void> {
-  field.value = text;
+async function addCategory(screen: Screen, name: string): Promise<void> {
+  await screen.click('+ Add category');
+  const field = screen.harness.routeNativeElement!.querySelector<HTMLInputElement>(
+    'input[aria-label="New category name"]',
+  )!;
+  field.value = name;
   field.dispatchEvent(new Event('input'));
   await screen.harness.fixture.whenStable();
+  await screen.click('Add');
 }

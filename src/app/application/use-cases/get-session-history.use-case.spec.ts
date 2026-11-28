@@ -3,11 +3,23 @@ import { createTestApp } from '../testing/test-app';
 describe('GetSessionHistoryUseCase', () => {
   it('groups attempts by day, newest day first and longest attempt first', async () => {
     const app = createTestApp('2026-11-16');
-    await app.startChallenge.execute(60);
-    await app.recordAttempt.execute({ durationSeconds: 41, source: 'timer' });
-    await app.recordAttempt.execute({ durationSeconds: 68, source: 'timer' });
+    const challenge = await app.startChallenge.execute(60);
+    await app.recordAttempt.execute({
+      challengeId: challenge.id,
+      durationSeconds: 41,
+      source: 'timer',
+    });
+    await app.recordAttempt.execute({
+      challengeId: challenge.id,
+      durationSeconds: 68,
+      source: 'timer',
+    });
     app.clock.currentDate = '2026-11-18'; // day 3, day 2 missed
-    await app.recordAttempt.execute({ durationSeconds: 50, source: 'timer' });
+    await app.recordAttempt.execute({
+      challengeId: challenge.id,
+      durationSeconds: 50,
+      source: 'timer',
+    });
 
     const [sessions] = await app.getSessionHistory.execute();
 
@@ -24,7 +36,7 @@ describe('GetSessionHistoryUseCase', () => {
     const app = createTestApp('2026-10-01');
     await app.startChallenge.execute(60);
     app.clock.currentDate = '2026-11-05'; // the October challenge has ended
-    await app.getOverview.execute();
+    await app.getTimedOverviews.execute();
     await app.startChallenge.execute(90);
 
     const history = await app.getSessionHistory.execute();

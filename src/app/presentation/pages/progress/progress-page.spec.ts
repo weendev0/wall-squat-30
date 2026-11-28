@@ -18,7 +18,7 @@ describe('Progress screen', () => {
 
     const screen = await openScreen('/progress');
 
-    expect(screen.text()).toContain('Wall squat · started Mon 16 Nov');
+    expect(screen.text()).toContain('Wall Squat · started Mon 16 Nov');
     expect(screen.text()).toContain('Target hit. Day 3 done. 1:14 +14s over target');
   });
 
@@ -61,7 +61,7 @@ describe('Progress screen', () => {
   });
 
   it('suggests making up the earliest unfinished day', async () => {
-    await createChallengeHistory(
+    const challenge = await createChallengeHistory(
       fakes,
       [
         { dayNumber: 1, durationSeconds: 50 },
@@ -74,7 +74,7 @@ describe('Progress screen', () => {
     expect(screen.text()).toContain('Day 1 was under target (0:50)');
 
     await screen.click('Make up');
-    expect(screen.currentUrl()).toBe('/add-attempt?day=1');
+    expect(screen.currentUrl()).toBe(`/add-attempt/${challenge.id}?day=1`);
   });
 
   it('offers no make-up when every past day is done', async () => {

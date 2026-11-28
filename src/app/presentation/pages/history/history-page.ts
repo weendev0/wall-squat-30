@@ -51,14 +51,15 @@ export class HistoryPage {
   /** From ?challenge=<id>, set by the tabs. */
   readonly challenge = input<string>();
 
-  protected readonly overview = this.store.overview;
   /** History also lists finished check-off challenges, so their notes stay readable. */
   protected readonly checkOffs = inject(CheckOffStore).overviews;
   protected readonly selected = selectedChallenge(
     this.challenge,
-    this.store.overview,
+    this.store.active,
     this.checkOffs,
   );
+  /** The selected timed challenge; check-off challenges show CheckOffHistory instead. */
+  protected readonly overview = this.selected.timed;
 
   /** The top of the chart, in seconds. */
   private readonly chartMaxSeconds = computed(() => {

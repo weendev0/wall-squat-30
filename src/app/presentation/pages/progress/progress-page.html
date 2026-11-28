@@ -96,7 +96,7 @@
         </div>
         <a
           class="make-up-button"
-          routerLink="/add-attempt"
+          [routerLink]="['/add-attempt', overview.challenge.id]"
           [queryParams]="{ day: makeUp.dayNumber }"
           >Make up</a
         >

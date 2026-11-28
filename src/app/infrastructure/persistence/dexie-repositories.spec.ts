@@ -7,6 +7,7 @@ import {
 import { DexieAttemptRepository } from './dexie-attempt-repository';
 import { DexieChallengeRepository } from './dexie-challenge-repository';
 import { DexieCheckInRepository } from './dexie-check-in-repository';
+import { DexieTimedCategoryRepository } from './dexie-timed-category-repository';
 import { WallSquatDatabase } from './wall-squat-database';
 
 describe('Dexie repositories', () => {
@@ -94,6 +95,20 @@ describe('Dexie repositories', () => {
     await checkIns.save(checkIn);
 
     await expect(checkIns.save({ ...checkIn, id: 'k2' })).rejects.toThrow();
+  });
+
+  it('BR-15: keeps timed categories in the order they were added, and clears them', async () => {
+    const categories = new DexieTimedCategoryRepository(database);
+    await categories.save({ id: 't2', name: 'Plank' });
+    await categories.save({ id: 't1', name: 'Lunge hold' });
+
+    expect((await categories.findAll()).map((category) => category.name)).toEqual([
+      'Plank',
+      'Lunge hold',
+    ]);
+
+    await categories.deleteAll();
+    expect(await categories.findAll()).toEqual([]);
   });
 
   it('clears everything on reset', async () => {

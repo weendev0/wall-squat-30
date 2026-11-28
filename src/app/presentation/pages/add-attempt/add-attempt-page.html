@@ -1,7 +1,7 @@
 <main class="screen">
   <header class="top-bar">
     <button type="button" class="button-quiet" (click)="cancel()">Cancel</button>
-    <h1 class="top-title">Add attempt</h1>
+    <h1 class="top-title">Add attempt · {{ challengeName }}</h1>
     <button type="button" class="button-quiet save" [disabled]="isSaving()" (click)="save()">
       Save
     </button>

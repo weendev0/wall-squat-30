@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DayResult, DomainError, Feeling, formatDuration } from '../../../domain';
 import { DurationFields } from '../../shared/duration-fields';
 import { shortDateLabel } from '../../shared/date-label';
 import { FEELING_OPTIONS } from '../../shared/feelings';
 import { ChallengeStore } from '../../state/challenge-store';
+import { challengeIdOf } from '../../state/route-guards';
 
 /** One choice in the "Which day" list. */
 interface DayOption {
@@ -30,11 +31,12 @@ export class AddAttemptPage implements OnInit {
   private readonly store = inject(ChallengeStore);
   private readonly router = inject(Router);
 
-  /** The day to preselect, from the address: /add-attempt?day=4 */
+  /** The day to preselect, from the address: /add-attempt/:challengeId?day=4 */
   readonly day = input<string>();
 
-  // The route guard makes sure today is a challenge day before this screen opens.
-  private readonly overview = this.store.overview()!;
+  // The route guard makes sure /add-attempt/:challengeId is running with a day today.
+  private readonly overview = this.store.find(challengeIdOf(inject(ActivatedRoute).snapshot))!;
+  protected readonly challengeName = this.overview.challenge.name;
   private readonly todayNumber = this.overview.todayDayNumber!;
 
   protected readonly feelings = FEELING_OPTIONS;
@@ -66,12 +68,13 @@ export class AddAttemptPage implements OnInit {
     this.errorMessage.set('');
     try {
       await this.store.record({
+        challengeId: this.overview.challenge.id,
         durationSeconds: this.durationSeconds(),
         source: 'manual',
         dayNumber: this.selectedDay(),
         feeling: this.feeling(),
       });
-      await this.router.navigate(['/progress']);
+      await this.backToProgress();
     } catch (error) {
       this.errorMessage.set(
         error instanceof DomainError ? error.message : 'Could not save. Try again.',
@@ -82,7 +85,14 @@ export class AddAttemptPage implements OnInit {
   }
 
   protected cancel(): void {
-    void this.router.navigate(['/progress']);
+    void this.backToProgress();
+  }
+
+  /** Back to Progress, on this challenge's tab. */
+  private async backToProgress(): Promise<void> {
+    await this.router.navigate(['/progress'], {
+      queryParams: { challenge: this.overview.challenge.id },
+    });
   }
 }
 

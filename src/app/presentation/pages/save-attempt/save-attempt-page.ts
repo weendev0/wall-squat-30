@@ -46,6 +46,7 @@ export class SaveAttemptPage {
     this.errorMessage.set('');
     try {
       await this.store.record({
+        challengeId: this.draft.challengeId,
         durationSeconds: this.draft.durationSeconds,
         source: 'timer',
         dayNumber: this.draft.dayNumber,
@@ -68,11 +69,11 @@ export class SaveAttemptPage {
 
   protected tryAgain(): Promise<void> {
     void this.sound.unlock(); // inside the tap, so the countdown beeps can play
-    return this.leaveTo('/timer');
+    return this.leaveTo('/timer', this.draft.challengeId);
   }
 
-  private async leaveTo(path: string): Promise<void> {
+  private async leaveTo(...commands: string[]): Promise<void> {
     this.drafts.clear();
-    await this.router.navigate([path]);
+    await this.router.navigate(commands);
   }
 }

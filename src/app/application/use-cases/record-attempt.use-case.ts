@@ -6,12 +6,16 @@ import {
   DomainError,
   Feeling,
   isPersonalBest,
+  isSameCategoryName,
+  isTimedChallenge,
   isTooShortToKeep,
+  TimedChallenge,
 } from '../../domain';
 import { AttemptRepository, ChallengeRepository, Clock, IdGenerator } from '../ports';
-import { findActiveTimedChallenge } from './find-active-timed-challenge';
 
 export interface RecordAttemptInput {
+  /** BR-16: the running timed challenge the attempt belongs to. */
+  readonly challengeId: string;
   readonly durationSeconds: number;
   readonly source: AttemptSource;
   /** Leave out to record for today. A past day makes it a make-up (BR-07). */
@@ -25,10 +29,12 @@ export type RecordAttemptResult =
   | { readonly status: 'saved'; readonly attempt: Attempt; readonly isPersonalBest: boolean };
 
 /**
- * Saves a timed or hand-typed attempt into the active wall squat challenge.
+ * Saves a timed or hand-typed attempt into a running timed challenge.
  * - BR-05: a timed attempt under 5 seconds is discarded without an error.
  * - BR-07: an attempt for an earlier day is a make-up.
  * - BR-08: a manual attempt keeps source 'manual'.
+ * - BR-17: a personal best is compared within the same category only, so a long plank
+ *   does not hide a wall squat record.
  */
 export class RecordAttemptUseCase {
   constructor(
@@ -43,10 +49,7 @@ export class RecordAttemptUseCase {
       return { status: 'too-short' };
     }
 
-    const challenge = await findActiveTimedChallenge(this.challenges);
-    if (challenge === null) {
-      throw new DomainError('Start a challenge before recording an attempt.');
-    }
+    const challenge = await this.findRunningChallenge(input.challengeId);
 
     const today = this.clock.today();
     const dayNumber = input.dayNumber ?? dayNumberOn(challenge, today);
@@ -65,7 +68,7 @@ export class RecordAttemptUseCase {
       note: input.note,
     });
 
-    const earlierAttempts = await this.attempts.findAll();
+    const earlierAttempts = await this.attemptsInSameCategory(challenge);
     await this.attempts.save(attempt);
 
     return {
@@ -73,5 +76,24 @@ export class RecordAttemptUseCase {
       attempt,
       isPersonalBest: isPersonalBest(attempt.durationSeconds, earlierAttempts),
     };
+  }
+
+  private async findRunningChallenge(challengeId: string): Promise<TimedChallenge> {
+    const challenge = await this.challenges.findById(challengeId);
+    if (challenge === null || !isTimedChallenge(challenge)) {
+      throw new DomainError('Start a timed challenge before recording an attempt.');
+    }
+    return challenge;
+  }
+
+  private async attemptsInSameCategory(challenge: TimedChallenge): Promise<Attempt[]> {
+    const sameCategoryIds = new Set(
+      (await this.challenges.findAll())
+        .filter(isTimedChallenge)
+        .filter((other) => isSameCategoryName(other.name, challenge.name))
+        .map((other) => other.id),
+    );
+    const all = await this.attempts.findAll();
+    return all.filter((attempt) => sameCategoryIds.has(attempt.challengeId));
   }
 }

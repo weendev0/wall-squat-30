@@ -13,7 +13,7 @@ interface NoteRow {
 
 /**
  * History of a Reading, Course or Study challenge: its totals and every day's note,
- * newest first (BR-15). Shares its look with the wall squat History screen.
+ * newest first (BR-15). Shares its look with the timed History screen.
  */
 @Component({
   selector: 'app-check-off-history',

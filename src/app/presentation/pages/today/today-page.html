@@ -16,7 +16,7 @@
   @if (savedNotice(); as notice) {
     <div class="card notice" role="status">
       <span>
-        Saved {{ notice.durationSeconds | duration }}.
+        Saved {{ notice.durationSeconds | duration }} for {{ notice.challengeName }}.
         @if (notice.isPersonalBest) {
           <strong>New personal best!</strong>
         }
@@ -28,30 +28,29 @@
   }
 
   <section class="cards" aria-label="Your challenges">
-    @if (wallSquat(); as overview) {
-      @if (wallSquatToday(); as today) {
-        <app-challenge-card
-          [category]="overview.challenge.category"
-          [name]="overview.challenge.name"
-          [dayNumber]="today.dayNumber"
-          [detail]="wallSquatDetail()"
-          [days]="overview.days"
-          [streak]="overview.progress.currentStreak"
-          [daysComplete]="overview.progress.daysComplete"
+    @for (card of timedCards(); track card.overview.challenge.id) {
+      <app-challenge-card
+        [category]="card.overview.challenge.category"
+        [name]="card.overview.challenge.name"
+        [dayNumber]="card.today.dayNumber"
+        [detail]="card.detail"
+        [days]="card.overview.days"
+        [streak]="card.overview.progress.currentStreak"
+        [daysComplete]="card.overview.progress.daysComplete"
+      >
+        <button
+          type="button"
+          class="card-action"
+          [class.is-done]="card.today.status === 'complete'"
+          [attr.aria-label]="'Start ' + card.overview.challenge.name"
+          (click)="startHold(card.overview.challenge.id)"
         >
-          <button
-            type="button"
-            class="card-action"
-            [class.is-done]="today.status === 'complete'"
-            (click)="startHold()"
-          >
-            START
-          </button>
-        </app-challenge-card>
-      }
+          START
+        </button>
+      </app-challenge-card>
     }
 
-    @if (!wallSquatToday() && checkOffCards().length === 0) {
+    @if (timedCards().length === 0 && checkOffCards().length === 0) {
       <div class="card empty">
         <p class="muted">No challenge is running yet. Start one and it shows up here.</p>
         <a class="button-primary empty-action" routerLink="/new-challenge">Start a new challenge</a>

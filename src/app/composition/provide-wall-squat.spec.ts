@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import {
   DeleteAttemptUseCase,
   ExportHistoryCsvUseCase,
-  GetChallengeOverviewUseCase,
   GetSessionHistoryUseCase,
+  GetTimedOverviewsUseCase,
   MarkCelebrationShownUseCase,
   RecordAttemptUseCase,
   ResetHistoryUseCase,
@@ -32,7 +32,7 @@ describe('provideWallSquat', () => {
 
   const useCases: Type<unknown>[] = [
     StartChallengeUseCase,
-    GetChallengeOverviewUseCase,
+    GetTimedOverviewsUseCase,
     GetSessionHistoryUseCase,
     RecordAttemptUseCase,
     DeleteAttemptUseCase,
@@ -52,12 +52,16 @@ describe('provideWallSquat', () => {
   });
 
   it('wires the use cases to real storage end to end', async () => {
-    await TestBed.inject(StartChallengeUseCase).execute();
-    await TestBed.inject(RecordAttemptUseCase).execute({ durationSeconds: 61, source: 'timer' });
+    const challenge = await TestBed.inject(StartChallengeUseCase).execute();
+    await TestBed.inject(RecordAttemptUseCase).execute({
+      challengeId: challenge.id,
+      durationSeconds: 61,
+      source: 'timer',
+    });
 
-    const overview = await TestBed.inject(GetChallengeOverviewUseCase).execute();
+    const [overview] = await TestBed.inject(GetTimedOverviewsUseCase).execute();
 
-    expect(overview?.todayDayNumber).toBe(1);
-    expect(overview?.days[0].status).toBe('complete');
+    expect(overview.todayDayNumber).toBe(1);
+    expect(overview.days[0].status).toBe('complete');
   });
 });

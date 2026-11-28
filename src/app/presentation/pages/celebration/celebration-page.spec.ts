@@ -3,10 +3,11 @@ import { openScreen, setUpApp } from '../../testing/screen-test-helpers';
 
 describe('Celebration screen', () => {
   let fakes: ReturnType<typeof setUpApp>;
+  let challengeId: string;
 
   beforeEach(async () => {
     fakes = setUpApp();
-    await createChallengeHistory(
+    const challenge = await createChallengeHistory(
       fakes,
       [
         { dayNumber: 1, durationSeconds: 62 },
@@ -16,12 +17,13 @@ describe('Celebration screen', () => {
       ],
       31, // the day after day 30
     );
+    challengeId = challenge.id;
   });
 
   it('opens instead of Today once, right after day 30, with the final numbers', async () => {
     const screen = await openScreen('/today');
 
-    expect(screen.currentUrl()).toBe('/celebration');
+    expect(screen.currentUrl()).toBe(`/celebration/${challengeId}`);
     expect(screen.text()).toContain('30 days done!');
     expect(screen.text()).toContain('Days complete 4/30');
     expect(screen.text()).toContain('Best hold 1:22');
@@ -30,7 +32,7 @@ describe('Celebration screen', () => {
   });
 
   it('is not shown again after starting a new challenge', async () => {
-    const screen = await openScreen('/celebration');
+    const screen = await openScreen(`/celebration/${challengeId}`);
 
     await screen.click('Start a new challenge');
 
@@ -40,7 +42,7 @@ describe('Celebration screen', () => {
   });
 
   it('can open the finished challenge in All sessions', async () => {
-    const screen = await openScreen('/celebration');
+    const screen = await openScreen(`/celebration/${challengeId}`);
 
     await screen.click('View this challenge in history');
 
@@ -49,10 +51,10 @@ describe('Celebration screen', () => {
   });
 
   it('cannot be opened when no challenge has just finished', async () => {
-    const screen = await openScreen('/celebration');
+    const screen = await openScreen(`/celebration/${challengeId}`);
     await screen.click('Start a new challenge');
 
-    await screen.harness.navigateByUrl('/celebration');
+    await screen.harness.navigateByUrl(`/celebration/${challengeId}`);
 
     expect(screen.currentUrl()).toBe('/today');
   });

@@ -2,6 +2,8 @@ import { Injectable, signal } from '@angular/core';
 
 /** A hold that was just stopped, waiting for the user to choose Save or Discard (BR-05). */
 export interface AttemptDraft {
+  /** The timed challenge the hold belongs to (BR-16). */
+  readonly challengeId: string;
   readonly durationSeconds: number;
   /** The challenge day the hold was started on. */
   readonly dayNumber: number;

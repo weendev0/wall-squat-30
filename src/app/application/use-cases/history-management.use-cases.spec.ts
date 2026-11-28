@@ -5,10 +5,16 @@ import { createTestApp } from '../testing/test-app';
 describe('history management use cases', () => {
   async function appWithTwoAttempts() {
     const app = createTestApp('2026-11-16');
-    await app.startChallenge.execute();
-    await app.recordAttempt.execute({ durationSeconds: 65, source: 'timer', feeling: 'easy' });
+    const challenge = await app.startChallenge.execute();
+    await app.recordAttempt.execute({
+      challengeId: challenge.id,
+      durationSeconds: 65,
+      source: 'timer',
+      feeling: 'easy',
+    });
     app.clock.currentDate = '2026-11-18'; // Day 3
     await app.recordAttempt.execute({
+      challengeId: challenge.id,
       durationSeconds: 52,
       source: 'manual',
       dayNumber: 2,
@@ -24,8 +30,8 @@ describe('history management use cases', () => {
 
       await app.deleteAttempt.execute(first.id);
 
-      const overview = await app.getOverview.execute();
-      expect(overview?.days[0].status).toBe('missed');
+      const [overview] = await app.getTimedOverviews.execute();
+      expect(overview.days[0].status).toBe('missed');
     });
 
     it('fails clearly for an unknown attempt', async () => {
@@ -35,14 +41,16 @@ describe('history management use cases', () => {
   });
 
   describe('ResetHistoryUseCase (BR-11)', () => {
-    it('deletes every challenge and attempt', async () => {
+    it('deletes every challenge, attempt and saved category', async () => {
       const app = await appWithTwoAttempts();
+      await app.addTimedCategory.execute('Plank');
 
       await app.resetHistory.execute();
 
       expect(app.challenges.items.size).toBe(0);
       expect(app.attempts.items.size).toBe(0);
-      expect(await app.getOverview.execute()).toBeNull();
+      expect(app.categories.items).toEqual([]);
+      expect(await app.getTimedOverviews.execute()).toEqual([]);
     });
   });
 
@@ -54,8 +62,8 @@ describe('history management use cases', () => {
 
       expect(csv.split('\n')).toEqual([
         'challenge,category,challenge_start,target,day,day_date,recorded_on,seconds,time,source,make_up,feeling,note',
-        'Wall squat,exercise,2026-11-16,1:00,1,2026-11-16,2026-11-16,65,1:05,timer,no,easy,',
-        'Wall squat,exercise,2026-11-16,1:00,2,2026-11-17,2026-11-18,52,0:52,manual,yes,none,"tired, ""short"" one"',
+        'Wall Squat,exercise,2026-11-16,1:00,1,2026-11-16,2026-11-16,65,1:05,timer,no,easy,',
+        'Wall Squat,exercise,2026-11-16,1:00,2,2026-11-17,2026-11-18,52,0:52,manual,yes,none,"tired, ""short"" one"',
       ]);
     });
 

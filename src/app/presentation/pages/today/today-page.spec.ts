@@ -10,22 +10,24 @@ import { openScreen, setUpApp } from '../../testing/screen-test-helpers';
 
 describe('Today screen', () => {
   let fakes: ReturnType<typeof setUpApp>;
+  let challengeId: string;
 
   beforeEach(async () => {
     fakes = setUpApp('2026-11-16');
-    await TestBed.inject(StartChallengeUseCase).execute(60);
+    challengeId = (await TestBed.inject(StartChallengeUseCase).execute(60)).id;
   });
 
   it('shows the day, the target and the numbers of the challenge', async () => {
     fakes.clock.currentDate = '2026-11-17';
     await TestBed.inject(RecordAttemptUseCase).execute({
+      challengeId,
       durationSeconds: 72,
       source: 'timer',
     });
 
     const screen = await openScreen('/today');
 
-    expect(screen.text()).toContain('Exercise Day 2 of 30 Wall squat');
+    expect(screen.text()).toContain('Exercise Day 2 of 30 Wall Squat');
     expect(screen.text()).toContain('Target 1:00 · best today 1:12 · 1 attempt');
     expect(screen.text()).toContain('Streak 1 day');
     expect(screen.text()).toContain('1/30 done');
@@ -38,7 +40,7 @@ describe('Today screen', () => {
     await screen.click('START');
 
     expect(fakes.sound.isUnlocked).toBe(true);
-    expect(screen.currentUrl()).toBe('/timer');
+    expect(screen.currentUrl()).toBe(`/timer/${challengeId}`);
   });
 
   it('gives way to the Celebration screen once day 30 has passed', async () => {
@@ -46,7 +48,7 @@ describe('Today screen', () => {
 
     const screen = await openScreen('/today');
 
-    expect(screen.currentUrl()).toBe('/celebration');
+    expect(screen.currentUrl()).toBe(`/celebration/${challengeId}`);
   });
 
   it('shows the tab bar with Progress and History', async () => {
@@ -116,12 +118,28 @@ describe('Today screen', () => {
 
   it('closes the saved message', async () => {
     const screen = await openScreen('/today');
-    await TestBed.inject(ChallengeStore).record({ durationSeconds: 40, source: 'timer' });
+    await TestBed.inject(ChallengeStore).record({
+      challengeId,
+      durationSeconds: 40,
+      source: 'timer',
+    });
     await screen.harness.fixture.whenStable();
-    expect(screen.text()).toContain('Saved 0:40.');
+    expect(screen.text()).toContain('Saved 0:40 for Wall Squat.');
 
     await screen.click('✕');
 
-    expect(screen.text()).not.toContain('Saved 0:40.');
+    expect(screen.text()).not.toContain('Saved 0:40');
+  });
+
+  it('BR-16: shows a card with its own Start for each running timed challenge', async () => {
+    const plank = await TestBed.inject(StartChallengeUseCase).execute(45, 'Plank');
+
+    const screen = await openScreen('/today');
+
+    expect(screen.text()).toContain('Day 1 of 30 Plank');
+    expect(screen.text()).toContain('Target 0:45');
+    expect(screen.text()).toContain('0 of 2 done today');
+    await screen.click('Start Plank');
+    expect(screen.currentUrl()).toBe(`/timer/${plank.id}`);
   });
 });

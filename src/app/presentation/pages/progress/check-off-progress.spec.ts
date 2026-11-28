@@ -34,9 +34,9 @@ describe('Progress and History of a check-off challenge', () => {
   it('shows a tab per challenge, with the wall squat first', async () => {
     const screen = await openScreen('/progress');
 
-    expect(screen.hasButton('Wall squat')).toBe(true);
+    expect(screen.hasButton('Wall Squat')).toBe(true);
     expect(screen.hasButton('Atomic Habits')).toBe(true);
-    expect(screen.text()).toContain('Wall squat · started Mon 23 Nov');
+    expect(screen.text()).toContain('Wall Squat · started Mon 23 Nov');
   });
 
   it('switches to the Reading grid with done, missed and note marks', async () => {

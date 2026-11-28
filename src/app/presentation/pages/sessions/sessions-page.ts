@@ -41,7 +41,7 @@ export class SessionsPage implements OnInit {
   readonly filter = input<string>();
 
   protected readonly filters: readonly FilterOption[] = [
-    { value: 'current', label: 'This challenge' },
+    { value: 'current', label: 'Running' },
     { value: 'past', label: 'Past challenges' },
     { value: 'all', label: 'All time' },
   ];
@@ -57,7 +57,7 @@ export class SessionsPage implements OnInit {
     const history = this.history();
     switch (this.selectedFilter()) {
       case 'current':
-        return history.slice(0, 1);
+        return history.filter((sessions) => sessions.challenge.status === 'active');
       case 'past':
         return history.filter((sessions) => sessions.challenge.status === 'completed');
       case 'all':
@@ -76,7 +76,7 @@ export class SessionsPage implements OnInit {
   protected heading(sessions: ChallengeSessions): string {
     const { challenge, attemptCount, days, missedDayCount } = sessions;
     const start = shortDateLabel(challenge.startDate);
-    return `Started ${start} · target ${formatDuration(challenge.targetSeconds)} · ${attemptCount} ${
+    return `${challenge.name} · started ${start} · target ${formatDuration(challenge.targetSeconds)} · ${attemptCount} ${
       attemptCount === 1 ? 'attempt' : 'attempts'
     } over ${days.length} ${days.length === 1 ? 'day' : 'days'} · ${missedDayCount} missed`;
   }

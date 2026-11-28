@@ -1,4 +1,12 @@
-import { Attempt, Challenge, CheckIn, CountdownCue, LocalDate, TimerCue } from '../../domain';
+import {
+  Attempt,
+  Challenge,
+  CheckIn,
+  CountdownCue,
+  LocalDate,
+  TimedCategory,
+  TimerCue,
+} from '../../domain';
 import {
   AttemptRepository,
   ChallengeRepository,
@@ -9,6 +17,7 @@ import {
   ScreenWakeLock,
   ShareOutcome,
   SoundPlayer,
+  TimedCategoryRepository,
 } from '../ports';
 
 /** In-memory stand-ins for the ports, so use cases can be tested without a browser. */
@@ -91,6 +100,22 @@ export class InMemoryCheckInRepository implements CheckInRepository {
 
   async deleteAll(): Promise<void> {
     this.items.clear();
+  }
+}
+
+export class InMemoryTimedCategoryRepository implements TimedCategoryRepository {
+  readonly items: TimedCategory[] = [];
+
+  async findAll(): Promise<TimedCategory[]> {
+    return [...this.items];
+  }
+
+  async save(category: TimedCategory): Promise<void> {
+    this.items.push(category);
+  }
+
+  async deleteAll(): Promise<void> {
+    this.items.length = 0;
   }
 }
 

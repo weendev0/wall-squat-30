@@ -3,10 +3,11 @@ import { openScreen, setUpApp } from '../../testing/screen-test-helpers';
 
 describe('Add attempt screen', () => {
   let fakes: ReturnType<typeof setUpApp>;
+  let challengeId: string;
 
   beforeEach(async () => {
     fakes = setUpApp();
-    await createChallengeHistory(
+    const challenge = await createChallengeHistory(
       fakes,
       [
         { dayNumber: 2, durationSeconds: 52 },
@@ -14,6 +15,7 @@ describe('Add attempt screen', () => {
       ],
       4,
     );
+    challengeId = challenge.id;
   });
 
   function dayOption(screen: Awaited<ReturnType<typeof openScreen>>, title: string): HTMLElement {
@@ -36,7 +38,7 @@ describe('Add attempt screen', () => {
   }
 
   it('lists today first, then earlier days with what a save would mean', async () => {
-    const screen = await openScreen('/add-attempt');
+    const screen = await openScreen(`/add-attempt/${challengeId}`);
 
     expect(screen.text()).toContain('Day 4 · Today Best so far 1:08');
     expect(screen.text()).toContain('Day 3 · Wed 18 Nov Missed, will count as make-up');
@@ -47,13 +49,13 @@ describe('Add attempt screen', () => {
   });
 
   it('preselects the day it was opened for', async () => {
-    const screen = await openScreen('/add-attempt?day=3');
+    const screen = await openScreen(`/add-attempt/${challengeId}?day=3`);
 
     expect(dayOption(screen, 'Day 3').getAttribute('aria-checked')).toBe('true');
   });
 
   it('saves a hand-typed make-up for an earlier day', async () => {
-    const screen = await openScreen('/add-attempt');
+    const screen = await openScreen(`/add-attempt/${challengeId}`);
 
     dayOption(screen, 'Day 3').click();
     await typeDuration(screen, '1', '05');
@@ -67,24 +69,24 @@ describe('Add attempt screen', () => {
       isMakeUp: true,
       feeling: 'tough',
     });
-    expect(screen.currentUrl()).toBe('/progress');
+    expect(screen.currentUrl()).toBe(`/progress?challenge=${challengeId}`);
   });
 
   it('explains why a time cannot be saved', async () => {
-    const screen = await openScreen('/add-attempt');
+    const screen = await openScreen(`/add-attempt/${challengeId}`);
 
     await typeDuration(screen, '0', '3');
     await screen.click('Save');
 
     expect(screen.text()).toContain('Attempts under 5 seconds are not saved.');
-    expect(screen.currentUrl()).toBe('/add-attempt');
+    expect(screen.currentUrl()).toBe(`/add-attempt/${challengeId}`);
   });
 
   it('goes back to Progress on Cancel', async () => {
-    const screen = await openScreen('/add-attempt');
+    const screen = await openScreen(`/add-attempt/${challengeId}`);
 
     await screen.click('Cancel');
 
-    expect(screen.currentUrl()).toBe('/progress');
+    expect(screen.currentUrl()).toBe(`/progress?challenge=${challengeId}`);
   });
 });

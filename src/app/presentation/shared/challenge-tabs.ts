@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, Signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ChallengeOverview, CheckOffOverview } from '../../application';
+import { CheckOffOverview, TimedOverview } from '../../application';
 import { ChallengeCategory } from '../../domain';
 import { ChallengeStore } from '../state/challenge-store';
 import { CheckOffStore } from '../state/check-off-store';
@@ -8,25 +8,29 @@ import { toneClass } from './challenge-category';
 
 /** Which challenge Progress or History shows. */
 export type ChallengeSelection =
-  | { readonly kind: 'timed'; readonly overview: ChallengeOverview }
+  | { readonly kind: 'timed'; readonly overview: TimedOverview }
   | { readonly kind: 'checkoff'; readonly overview: CheckOffOverview }
   | null;
 
 /**
  * Picks the challenge named by ?challenge=<id>. Without one (or with an unknown id)
- * it falls back to the wall squat, then to the first check-off challenge.
+ * it falls back to the first timed challenge, then to the first check-off challenge.
  */
 export function selectChallenge(
   selectedId: string | undefined,
-  wallSquat: ChallengeOverview | null,
+  timed: readonly TimedOverview[],
   checkOffs: readonly CheckOffOverview[],
 ): ChallengeSelection {
+  const timedMatch = timed.find((overview) => overview.challenge.id === selectedId);
+  if (timedMatch) {
+    return { kind: 'timed', overview: timedMatch };
+  }
   const checkOff = checkOffs.find((overview) => overview.challenge.id === selectedId);
   if (checkOff) {
     return { kind: 'checkoff', overview: checkOff };
   }
-  if (wallSquat) {
-    return { kind: 'timed', overview: wallSquat };
+  if (timed.length > 0) {
+    return { kind: 'timed', overview: timed[0] };
   }
   return checkOffs.length > 0 ? { kind: 'checkoff', overview: checkOffs[0] } : null;
 }
@@ -35,7 +39,9 @@ export function selectChallenge(
 export interface SelectedChallenge {
   /** The id of the selected tab, or null when there is no challenge at all. */
   readonly id: Signal<string | null>;
-  /** The selected check-off challenge, or null when the wall squat is selected. */
+  /** The selected timed challenge, or null when a check-off challenge (or nothing) is selected. */
+  readonly timed: Signal<TimedOverview | null>;
+  /** The selected check-off challenge, or null when a timed challenge is selected. */
   readonly checkOff: Signal<CheckOffOverview | null>;
   /** The tone class of the selected challenge, so the whole screen takes its colour. */
   readonly tone: Signal<string>;
@@ -44,12 +50,16 @@ export interface SelectedChallenge {
 /** Follows ?challenge=<id> and the stores, and works out what Progress or History shows. */
 export function selectedChallenge(
   selectedId: Signal<string | undefined>,
-  wallSquat: Signal<ChallengeOverview | null>,
+  timed: Signal<readonly TimedOverview[]>,
   checkOffs: Signal<readonly CheckOffOverview[]>,
 ): SelectedChallenge {
-  const selection = computed(() => selectChallenge(selectedId(), wallSquat(), checkOffs()));
+  const selection = computed(() => selectChallenge(selectedId(), timed(), checkOffs()));
   return {
     id: computed(() => selection()?.overview.challenge.id ?? null),
+    timed: computed(() => {
+      const current = selection();
+      return current?.kind === 'timed' ? current.overview : null;
+    }),
     checkOff: computed(() => {
       const current = selection();
       return current?.kind === 'checkoff' ? current.overview : null;
@@ -118,7 +128,7 @@ interface Tab {
   `,
 })
 export class ChallengeTabs {
-  private readonly wallSquat = inject(ChallengeStore).overview;
+  private readonly timed = inject(ChallengeStore).active;
 
   /** The check-off challenges to offer (History also shows finished ones). */
   readonly checkOffs = input.required<readonly CheckOffOverview[]>();
@@ -127,10 +137,11 @@ export class ChallengeTabs {
   protected readonly toneClass = toneClass;
 
   protected readonly tabs = computed<Tab[]>(() => {
-    const wallSquat = this.wallSquat();
-    const tabs: Tab[] = wallSquat
-      ? [{ id: wallSquat.challenge.id, label: wallSquat.challenge.name, category: 'exercise' }]
-      : [];
+    const tabs: Tab[] = this.timed().map(({ challenge }) => ({
+      id: challenge.id,
+      label: challenge.name,
+      category: challenge.category,
+    }));
     for (const { challenge } of this.checkOffs()) {
       const label = challenge.status === 'active' ? challenge.name : `${challenge.name} (finished)`;
       tabs.push({ id: challenge.id, label, category: challenge.category });
