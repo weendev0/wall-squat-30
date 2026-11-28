@@ -6,15 +6,20 @@ import {
   provideAppInitializer,
 } from '@angular/core';
 import {
+  AddCheckOffCategoryUseCase,
   AddTimedCategoryUseCase,
   AttemptRepository,
   ChallengeRepository,
   CheckInRepository,
   CheckInUseCase,
+  CheckOffCategoryRepository,
   Clock,
   DeleteAttemptUseCase,
+  DeleteCheckOffCategoryUseCase,
+  EditCheckOffCategoryUseCase,
   ExportHistoryCsvUseCase,
   FileSharer,
+  GetCheckOffCategoriesUseCase,
   GetCheckOffOverviewsUseCase,
   GetSessionHistoryUseCase,
   GetTimedCategoriesUseCase,
@@ -38,6 +43,7 @@ import { WebAudioSoundPlayer } from '../infrastructure/device/web-audio-sound-pl
 import { DexieAttemptRepository } from '../infrastructure/persistence/dexie-attempt-repository';
 import { DexieChallengeRepository } from '../infrastructure/persistence/dexie-challenge-repository';
 import { DexieCheckInRepository } from '../infrastructure/persistence/dexie-check-in-repository';
+import { DexieCheckOffCategoryRepository } from '../infrastructure/persistence/dexie-check-off-category-repository';
 import { DexieTimedCategoryRepository } from '../infrastructure/persistence/dexie-timed-category-repository';
 import { WallSquatDatabase } from '../infrastructure/persistence/wall-squat-database';
 
@@ -53,6 +59,9 @@ export const ATTEMPT_REPOSITORY = new InjectionToken<AttemptRepository>('Attempt
 export const CHECK_IN_REPOSITORY = new InjectionToken<CheckInRepository>('CheckInRepository');
 export const TIMED_CATEGORY_REPOSITORY = new InjectionToken<TimedCategoryRepository>(
   'TimedCategoryRepository',
+);
+export const CHECK_OFF_CATEGORY_REPOSITORY = new InjectionToken<CheckOffCategoryRepository>(
+  'CheckOffCategoryRepository',
 );
 export const CLOCK = new InjectionToken<Clock>('Clock');
 export const ID_GENERATOR = new InjectionToken<IdGenerator>('IdGenerator');
@@ -79,6 +88,10 @@ export function provideWallSquat(): EnvironmentProviders {
     {
       provide: TIMED_CATEGORY_REPOSITORY,
       useFactory: () => new DexieTimedCategoryRepository(inject(WALL_SQUAT_DATABASE)),
+    },
+    {
+      provide: CHECK_OFF_CATEGORY_REPOSITORY,
+      useFactory: () => new DexieCheckOffCategoryRepository(inject(WALL_SQUAT_DATABASE)),
     },
     { provide: CLOCK, useFactory: () => new SystemClock() },
     { provide: ID_GENERATOR, useFactory: () => new RandomIdGenerator() },
@@ -140,6 +153,7 @@ export function provideWallSquat(): EnvironmentProviders {
           inject(ATTEMPT_REPOSITORY),
           inject(CHECK_IN_REPOSITORY),
           inject(TIMED_CATEGORY_REPOSITORY),
+          inject(CHECK_OFF_CATEGORY_REPOSITORY),
         ),
     },
     {
@@ -156,6 +170,7 @@ export function provideWallSquat(): EnvironmentProviders {
       useFactory: () =>
         new StartCheckOffChallengeUseCase(
           inject(CHALLENGE_REPOSITORY),
+          inject(CHECK_OFF_CATEGORY_REPOSITORY),
           inject(CLOCK),
           inject(ID_GENERATOR),
         ),
@@ -166,6 +181,7 @@ export function provideWallSquat(): EnvironmentProviders {
         new GetCheckOffOverviewsUseCase(
           inject(CHALLENGE_REPOSITORY),
           inject(CHECK_IN_REPOSITORY),
+          inject(CHECK_OFF_CATEGORY_REPOSITORY),
           inject(CLOCK),
         ),
     },
@@ -191,6 +207,32 @@ export function provideWallSquat(): EnvironmentProviders {
           inject(CHALLENGE_REPOSITORY),
           inject(ATTEMPT_REPOSITORY),
           inject(CHECK_IN_REPOSITORY),
+          inject(CHECK_OFF_CATEGORY_REPOSITORY),
+        ),
+    },
+    {
+      provide: GetCheckOffCategoriesUseCase,
+      useFactory: () =>
+        new GetCheckOffCategoriesUseCase(
+          inject(CHECK_OFF_CATEGORY_REPOSITORY),
+          inject(CHALLENGE_REPOSITORY),
+        ),
+    },
+    {
+      provide: AddCheckOffCategoryUseCase,
+      useFactory: () =>
+        new AddCheckOffCategoryUseCase(inject(CHECK_OFF_CATEGORY_REPOSITORY), inject(ID_GENERATOR)),
+    },
+    {
+      provide: EditCheckOffCategoryUseCase,
+      useFactory: () => new EditCheckOffCategoryUseCase(inject(CHECK_OFF_CATEGORY_REPOSITORY)),
+    },
+    {
+      provide: DeleteCheckOffCategoryUseCase,
+      useFactory: () =>
+        new DeleteCheckOffCategoryUseCase(
+          inject(CHECK_OFF_CATEGORY_REPOSITORY),
+          inject(CHALLENGE_REPOSITORY),
         ),
     },
 

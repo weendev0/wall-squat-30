@@ -65,3 +65,54 @@
 .save {
   background: var(--tone);
 }
+
+// BR-23: − count + for a counted challenge, such as 8 glasses of water.
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.count-button {
+  width: 64px;
+  height: 64px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 3px var(--tone);
+  color: var(--tone-ink);
+  font-size: 30px;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.count-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--tone-dim);
+
+  &.is-done {
+    background: var(--tone);
+    color: var(--color-on-accent);
+
+    .muted {
+      color: inherit;
+    }
+  }
+}
+
+.count-number {
+  font-size: 44px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,13 +1,19 @@
 import { Attempt, AttemptSource, createAttempt } from '../attempt';
 import {
-  CheckOffCategory,
   CheckOffChallenge,
   createCheckOffChallenge,
+  createCustomCheckOffChallenge,
   createTimedChallenge,
   dateOfDay,
   TimedChallenge,
 } from '../challenge';
 import { CheckIn, createCheckIn } from '../check-in';
+import {
+  BuiltInCheckOffCategory,
+  createCustomCheckOffCategory,
+  CustomCheckOffCategory,
+  CustomCheckOffCategoryFields,
+} from '../check-off-category';
 import { LocalDate } from '../local-date';
 
 /** Test helpers that build valid domain objects with sensible defaults. */
@@ -49,13 +55,44 @@ export function anAttempt(
 
 /** A Reading challenge called "Atomic Habits", starting on START_DATE unless told otherwise. */
 export function aCheckOffChallenge(
-  overrides: Partial<{ startDate: LocalDate; category: CheckOffCategory }> = {},
+  overrides: Partial<{ startDate: LocalDate; category: BuiltInCheckOffCategory }> = {},
 ): CheckOffChallenge {
   return createCheckOffChallenge({
     id: 'reading-1',
     startDate: overrides.startDate ?? START_DATE,
     name: 'Atomic Habits',
     category: overrides.category ?? 'reading',
+  });
+}
+
+/** The fields of a "Water Drinking" category: 8 glasses a day. */
+export function waterFields(
+  overrides: Partial<CustomCheckOffCategoryFields> = {},
+): CustomCheckOffCategoryFields {
+  return {
+    name: 'Water Drinking',
+    tone: 'sky',
+    icon: '💧',
+    dailyGoal: 8,
+    unit: 'glasses',
+    ...overrides,
+  };
+}
+
+/** A "Water Drinking" category of the user's own: 8 glasses a day. */
+export function aWaterCategory(
+  overrides: Partial<CustomCheckOffCategoryFields> = {},
+): CustomCheckOffCategory {
+  return createCustomCheckOffCategory('water', waterFields(overrides));
+}
+
+/** A "Water Drinking" challenge (8 glasses a day), starting on START_DATE. */
+export function aWaterChallenge(category = aWaterCategory()): CheckOffChallenge {
+  return createCustomCheckOffChallenge({
+    id: 'water-1',
+    startDate: START_DATE,
+    name: category.name,
+    category,
   });
 }
 
@@ -68,7 +105,7 @@ let checkInCounter = 0;
 export function aCheckIn(
   challenge: CheckOffChallenge,
   dayNumber: number,
-  options: { recordedOnDay?: number; note?: string } = {},
+  options: { recordedOnDay?: number; note?: string; count?: number } = {},
 ): CheckIn {
   checkInCounter++;
   return createCheckIn({
@@ -77,5 +114,6 @@ export function aCheckIn(
     dayNumber,
     recordedOn: dateOfDay(challenge, options.recordedOnDay ?? dayNumber),
     note: options.note,
+    count: options.count,
   });
 }

@@ -1,7 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import {
+  aCheckOffChallenge,
+  aWaterCategory,
+  aWaterChallenge,
+} from '../../domain/testing/domain-builders';
+import { challengeLook } from './challenge-category';
 import { shortDateLabel } from './date-label';
 import { DurationPipe } from './duration.pipe';
 import { ProgressRing } from './progress-ring';
+import { singular } from './singular';
 
 describe('DurationPipe', () => {
   const pipe = new DurationPipe();
@@ -33,5 +40,30 @@ describe('ProgressRing', () => {
 
     expect(dashOffsetFor(0.5)).toBeCloseTo(empty / 2);
     expect(dashOffsetFor(1.4)).toBe(0);
+  });
+});
+
+describe('singular', () => {
+  it('turns a plain plural into one item', () => {
+    expect(singular('glasses')).toBe('glass');
+    expect(singular('steps')).toBe('step');
+    expect(singular('pages')).toBe('page');
+    expect(singular('water')).toBe('water');
+    expect(singular('class')).toBe('class');
+  });
+});
+
+describe('challengeLook', () => {
+  it('uses the built-in word and colour, or your own name, colour and icon', () => {
+    expect(challengeLook(aCheckOffChallenge())).toEqual({
+      label: 'Reading',
+      toneClass: 'tone-reading',
+      icon: '',
+    });
+    expect(challengeLook(aWaterChallenge(), aWaterCategory())).toEqual({
+      label: 'Water Drinking',
+      toneClass: 'tone-sky',
+      icon: '💧',
+    });
   });
 });

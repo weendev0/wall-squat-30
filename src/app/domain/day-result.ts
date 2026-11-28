@@ -1,13 +1,14 @@
 import { Attempt } from './attempt';
 import { CHALLENGE_LENGTH_DAYS } from './challenge-rules.constants';
-import { Challenge, CheckOffChallenge, dateOfDay, TimedChallenge } from './challenge';
-import { CheckIn } from './check-in';
+import { CheckOffChallenge, dateOfDay, TimedChallenge } from './challenge';
+import { CheckIn, isCheckInDone } from './check-in';
 import { LocalDate } from './local-date';
 
 /**
  * What a challenge day looks like on the Progress grid.
  * - complete: the best attempt reached the target (BR-04), or Done was tapped (BR-14)
- * - under-target: attempts exist, but none reached the target (timed challenges only)
+ * - under-target: attempts exist, but none reached the target; or some were counted,
+ *   but not yet up to the daily goal (BR-23)
  * - missed: a past day with no attempts
  * - pending: today, nothing recorded yet
  * - upcoming: a day still to come
@@ -97,19 +98,20 @@ export function buildCheckOffDayResults(
 }
 
 function buildCheckOffDayResult(
-  challenge: Challenge,
+  challenge: CheckOffChallenge,
   dayNumber: number,
   checkIn: CheckIn | undefined,
   today: LocalDate,
 ): DayResult {
   const date = dateOfDay(challenge, dayNumber);
+  const isDone = checkIn !== undefined && isCheckInDone(challenge, checkIn);
   return {
     dayNumber,
     date,
-    status: checkIn ? 'complete' : statusWithoutRecord(date, today),
+    status: checkOffStatus(checkIn, isDone, date, today),
     bestSeconds: null,
-    completedOnTime: checkIn !== undefined && !checkIn.isMakeUp,
-    completedByMakeUp: checkIn?.isMakeUp ?? false,
+    completedOnTime: isDone && !checkIn.isMakeUp,
+    completedByMakeUp: isDone && checkIn.isMakeUp,
     hasManualAttempt: false,
     attemptCount: 0,
     hasNote: (checkIn?.note ?? '') !== '',
@@ -126,6 +128,19 @@ function statusOf(
     return bestSeconds >= targetSeconds ? 'complete' : 'under-target';
   }
   return statusWithoutRecord(date, today);
+}
+
+/** BR-22, BR-23: a counted day short of its goal looks like a timed day under its target. */
+function checkOffStatus(
+  checkIn: CheckIn | undefined,
+  isDone: boolean,
+  date: LocalDate,
+  today: LocalDate,
+): DayStatus {
+  if (isDone) {
+    return 'complete';
+  }
+  return checkIn === undefined ? statusWithoutRecord(date, today) : 'under-target';
 }
 
 /** A day with nothing recorded: still to come, today, or missed. */

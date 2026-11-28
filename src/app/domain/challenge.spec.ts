@@ -11,7 +11,12 @@ import {
   markCelebrationShown,
 } from './challenge';
 import { DomainError } from './domain-error';
-import { aChallenge, aCheckOffChallenge, START_DATE } from './testing/domain-builders';
+import {
+  aChallenge,
+  aCheckOffChallenge,
+  aWaterChallenge,
+  START_DATE,
+} from './testing/domain-builders';
 
 describe('challenge', () => {
   describe('BR-01: 30 calendar days from the start day', () => {
@@ -132,5 +137,24 @@ describe('challenge', () => {
       expect(() => isMakeUpDay(challenge, 13, '2026-11-27')).toThrow(DomainError);
       expect(() => isMakeUpDay(challenge, 3, '2026-12-16')).toThrow(DomainError);
     });
+  });
+});
+
+describe('BR-21, BR-22: a challenge in your own category', () => {
+  it('copies the goal and unit from the category', () => {
+    const challenge = aWaterChallenge();
+
+    expect(challenge).toMatchObject({
+      kind: 'checkoff',
+      category: 'custom',
+      customCategoryId: 'water',
+      name: 'Water Drinking',
+      dailyGoal: 8,
+      unit: 'glasses',
+    });
+  });
+
+  it('a built-in category is Just Done', () => {
+    expect(aCheckOffChallenge()).toMatchObject({ customCategoryId: null, dailyGoal: 1, unit: '' });
   });
 });

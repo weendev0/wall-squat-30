@@ -1,8 +1,21 @@
 import Dexie, { EntityTable } from 'dexie';
-import { Attempt, Challenge, CheckIn, TimedCategory, WALL_SQUAT_NAME } from '../../domain';
+import {
+  Attempt,
+  Challenge,
+  CheckIn,
+  CustomCheckOffCategory,
+  JUST_DONE_GOAL,
+  TimedCategory,
+  WALL_SQUAT_NAME,
+} from '../../domain';
 
 /** A saved timed category with its position, so the picker keeps the order they were added. */
 export interface StoredTimedCategory extends TimedCategory {
+  readonly order: number;
+}
+
+/** A saved check-off category with its position, so New challenge keeps the order they were added. */
+export interface StoredCheckOffCategory extends CustomCheckOffCategory {
   readonly order: number;
 }
 
@@ -25,6 +38,7 @@ export class WallSquatDatabase extends Dexie {
   attempts!: EntityTable<Attempt, 'id'>;
   checkIns!: EntityTable<CheckIn, 'id'>;
   timedCategories!: EntityTable<StoredTimedCategory, 'id'>;
+  checkOffCategories!: EntityTable<StoredCheckOffCategory, 'id'>;
 
   constructor(name: string = DATABASE_NAME) {
     super(name);
@@ -54,6 +68,24 @@ export class WallSquatDatabase extends Dexie {
     this.version(3).stores({
       timedCategories: 'id, order',
     });
+
+    // Version 4 (your own check-off categories, BR-21 to BR-24): a new table for categories
+    // such as Water Drinking. Every check-in gets a count and every check-off challenge a
+    // daily goal of 1 (Just Done), so all days saved before stay done.
+    this.version(4)
+      .stores({
+        checkOffCategories: 'id, order',
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table('checkIns')
+          .toCollection()
+          .modify((checkIn) => upgradeCheckInToVersion4(checkIn));
+        await tx
+          .table('challenges')
+          .toCollection()
+          .modify((challenge) => upgradeChallengeToVersion4(challenge));
+      });
   }
 }
 
@@ -64,4 +96,19 @@ function upgradeChallengeToVersion2(challenge: Record<string, unknown>): void {
   challenge['name'] ??= WALL_SQUAT_NAME;
   challenge['kind'] ??= 'timed';
   challenge['category'] ??= 'exercise';
+}
+
+/** Every check-in saved before version 4 was a single Done. */
+function upgradeCheckInToVersion4(checkIn: Record<string, unknown>): void {
+  checkIn['count'] ??= JUST_DONE_GOAL;
+}
+
+/** Every check-off challenge saved before version 4 is Reading, Course or Study: Just Done. */
+function upgradeChallengeToVersion4(challenge: Record<string, unknown>): void {
+  if (challenge['kind'] !== 'checkoff') {
+    return;
+  }
+  challenge['customCategoryId'] ??= null;
+  challenge['dailyGoal'] ??= JUST_DONE_GOAL;
+  challenge['unit'] ??= '';
 }

@@ -30,3 +30,12 @@ export const MAX_CHALLENGE_NAME_LENGTH = 40;
 
 /** BR-15: a daily note is for a few thoughts, not a whole essay. */
 export const MAX_NOTE_LENGTH = 1000;
+
+/** BR-22: the biggest daily goal of a counted category, such as 8 glasses of water. */
+export const MAX_DAILY_GOAL = 50;
+
+/** BR-22: the unit of a counted category, such as "glasses", fits on a Today card. */
+export const MAX_UNIT_LENGTH = 20;
+
+/** BR-23: counting past the goal is fine, up to this sanity limit for a single day. */
+export const MAX_DAY_COUNT = 99;

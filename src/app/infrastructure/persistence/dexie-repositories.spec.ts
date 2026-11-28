@@ -7,8 +7,10 @@ import {
 import { DexieAttemptRepository } from './dexie-attempt-repository';
 import { DexieChallengeRepository } from './dexie-challenge-repository';
 import { DexieCheckInRepository } from './dexie-check-in-repository';
+import { DexieCheckOffCategoryRepository } from './dexie-check-off-category-repository';
 import { DexieTimedCategoryRepository } from './dexie-timed-category-repository';
 import { WallSquatDatabase } from './wall-squat-database';
+import { aWaterCategory } from '../../domain/testing/domain-builders';
 
 describe('Dexie repositories', () => {
   let database: WallSquatDatabase;
@@ -106,6 +108,25 @@ describe('Dexie repositories', () => {
       'Plank',
       'Lunge hold',
     ]);
+
+    await categories.deleteAll();
+    expect(await categories.findAll()).toEqual([]);
+  });
+
+  it('BR-21, BR-24: saves your categories in order, edits in place, deletes and clears', async () => {
+    const categories = new DexieCheckOffCategoryRepository(database);
+    const water = aWaterCategory();
+    const walk = { ...aWaterCategory({ name: 'Walk', icon: '🚶' }), id: 'walk' };
+    await categories.save(water);
+    await categories.save(walk);
+
+    await categories.save({ ...water, name: 'Water' });
+
+    expect((await categories.findAll()).map(({ name }) => name)).toEqual(['Water', 'Walk']);
+    expect(await categories.findById('walk')).toEqual(walk);
+
+    await categories.delete('walk');
+    expect(await categories.findById('walk')).toBeNull();
 
     await categories.deleteAll();
     expect(await categories.findAll()).toEqual([]);

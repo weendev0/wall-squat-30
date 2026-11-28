@@ -5,19 +5,27 @@ import {
   CheckIn,
   CheckOffChallenge,
   completeChallenge,
+  CustomCheckOffCategory,
   DayResult,
   dayNumberOn,
   hasChallengeEnded,
   isCheckOffChallenge,
 } from '../../domain';
-import { ChallengeRepository, CheckInRepository, Clock } from '../ports';
+import {
+  ChallengeRepository,
+  CheckInRepository,
+  CheckOffCategoryRepository,
+  Clock,
+} from '../ports';
 
-/** Everything the screens need about one Reading, Course or Study challenge. */
+/** Everything the screens need about one check-off challenge, such as Reading or Water. */
 export interface CheckOffOverview {
   readonly challenge: CheckOffChallenge;
+  /** BR-21: the user's own category it belongs to, or null for Reading, Course and Study. */
+  readonly customCategory: CustomCheckOffCategory | null;
   readonly days: readonly DayResult[];
   readonly progress: ChallengeProgress;
-  /** Every Done of this challenge, newest day first. */
+  /** Every recorded day of this challenge, newest day first (a counted day may be unfinished). */
   readonly checkIns: readonly CheckIn[];
   /** Today's challenge day (1 to 30), or null once the challenge has ended. */
   readonly todayDayNumber: number | null;
@@ -34,6 +42,7 @@ export class GetCheckOffOverviewsUseCase {
   constructor(
     private readonly challenges: ChallengeRepository,
     private readonly checkIns: CheckInRepository,
+    private readonly categories: CheckOffCategoryRepository,
     private readonly clock: Clock,
   ) {}
 
@@ -42,10 +51,12 @@ export class GetCheckOffOverviewsUseCase {
     const all = (await this.challenges.findAll()).filter(isCheckOffChallenge);
     const challenges = await Promise.all(all.map((challenge) => this.completeIfEnded(challenge)));
     const checkIns = await this.checkIns.findAll();
+    const categories = await this.categories.findAll();
 
-    return challenges
-      .sort(runningFirstThenNewest)
-      .map((challenge) => toOverview(challenge, checkIns, today));
+    return challenges.sort(runningFirstThenNewest).map((challenge) => {
+      const customCategory = categories.find(({ id }) => id === challenge.customCategoryId) ?? null;
+      return toOverview(challenge, customCategory, checkIns, today);
+    });
   }
 
   private async completeIfEnded(challenge: CheckOffChallenge): Promise<CheckOffChallenge> {
@@ -61,6 +72,7 @@ export class GetCheckOffOverviewsUseCase {
 
 function toOverview(
   challenge: CheckOffChallenge,
+  customCategory: CustomCheckOffCategory | null,
   allCheckIns: readonly CheckIn[],
   today: string,
 ): CheckOffOverview {
@@ -72,6 +84,7 @@ function toOverview(
 
   return {
     challenge,
+    customCategory,
     days,
     progress: calculateProgress(days, [], today),
     checkIns,

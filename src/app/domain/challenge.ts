@@ -5,6 +5,11 @@ import {
   MIN_TARGET_SECONDS,
   WALL_SQUAT_NAME,
 } from './challenge-rules.constants';
+import {
+  BuiltInCheckOffCategory,
+  CustomCheckOffCategory,
+  JUST_DONE_GOAL,
+} from './check-off-category';
 import { DomainError } from './domain-error';
 import { addDays, assertLocalDate, daysBetween, LocalDate } from './local-date';
 
@@ -17,8 +22,11 @@ export type ChallengeStatus = 'active' | 'completed';
  */
 export type ChallengeKind = 'timed' | 'checkoff';
 
-/** What a check-off challenge is about. It also picks the colour on screen. */
-export type CheckOffCategory = 'reading' | 'course' | 'study';
+/**
+ * What a check-off challenge is about: a built-in category, or 'custom' for one the
+ * user added (BR-21). It also picks the colour on screen.
+ */
+export type CheckOffCategory = BuiltInCheckOffCategory | 'custom';
 
 /** Timed challenges are always exercise; check-off challenges pick a category. */
 export type ChallengeCategory = 'exercise' | CheckOffCategory;
@@ -49,6 +57,15 @@ export interface TimedChallenge extends ChallengeBase {
 export interface CheckOffChallenge extends ChallengeBase {
   readonly kind: 'checkoff';
   readonly category: CheckOffCategory;
+  /** BR-21: the user's own category, when `category` is 'custom'. Otherwise null. */
+  readonly customCategoryId: string | null;
+  /**
+   * BR-22: copied from the category when the challenge starts, so editing the category
+   * later never changes a running challenge. 1 means Just Done.
+   */
+  readonly dailyGoal: number;
+  /** BR-22: what is counted, such as "glasses". Empty for Just Done. */
+  readonly unit: string;
 }
 
 /**
@@ -69,7 +86,14 @@ export interface NewCheckOffChallengeInput {
   readonly id: string;
   readonly startDate: LocalDate;
   readonly name: string;
-  readonly category: CheckOffCategory;
+  readonly category: BuiltInCheckOffCategory;
+}
+
+export interface NewCustomCheckOffChallengeInput {
+  readonly id: string;
+  readonly startDate: LocalDate;
+  readonly name: string;
+  readonly category: CustomCheckOffCategory;
 }
 
 /** BR-01 and BR-02: creates a new active timed challenge after checking the input. */
@@ -83,12 +107,29 @@ export function createTimedChallenge(input: NewTimedChallengeInput): TimedChalle
   };
 }
 
-/** BR-13 and BR-14: creates a new active check-off challenge after checking the input. */
+/** BR-13 and BR-14: creates a new Reading, Course or Study challenge (Just Done). */
 export function createCheckOffChallenge(input: NewCheckOffChallengeInput): CheckOffChallenge {
   return {
     ...newChallengeBase(input.id, input.startDate, input.name),
     kind: 'checkoff',
     category: input.category,
+    customCategoryId: null,
+    dailyGoal: JUST_DONE_GOAL,
+    unit: '',
+  };
+}
+
+/** BR-21 and BR-22: creates a challenge in the user's own category, copying its goal. */
+export function createCustomCheckOffChallenge(
+  input: NewCustomCheckOffChallengeInput,
+): CheckOffChallenge {
+  return {
+    ...newChallengeBase(input.id, input.startDate, input.name),
+    kind: 'checkoff',
+    category: 'custom',
+    customCategoryId: input.category.id,
+    dailyGoal: input.category.dailyGoal,
+    unit: input.category.unit,
   };
 }
 

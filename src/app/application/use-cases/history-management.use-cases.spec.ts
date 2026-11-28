@@ -61,9 +61,9 @@ describe('history management use cases', () => {
       const csv = await app.exportCsv.execute();
 
       expect(csv.split('\n')).toEqual([
-        'challenge,category,challenge_start,target,day,day_date,recorded_on,seconds,time,source,make_up,feeling,note',
-        'Wall Squat,exercise,2026-11-16,1:00,1,2026-11-16,2026-11-16,65,1:05,timer,no,easy,',
-        'Wall Squat,exercise,2026-11-16,1:00,2,2026-11-17,2026-11-18,52,0:52,manual,yes,none,"tired, ""short"" one"',
+        'challenge,category,challenge_start,target,day,day_date,recorded_on,seconds,time,source,make_up,feeling,note,count',
+        'Wall Squat,exercise,2026-11-16,1:00,1,2026-11-16,2026-11-16,65,1:05,timer,no,easy,,',
+        'Wall Squat,exercise,2026-11-16,1:00,2,2026-11-17,2026-11-18,52,0:52,manual,yes,none,"tired, ""short"" one",',
       ]);
     });
 
@@ -78,14 +78,14 @@ describe('history management use cases', () => {
       const csv = await app.exportCsv.execute();
 
       expect(csv.split('\n')[1]).toBe(
-        'Atomic Habits,reading,2026-11-23,,1,2026-11-23,2026-11-23,,,check-in,no,,Chapter 1',
+        'Atomic Habits,reading,2026-11-23,,1,2026-11-23,2026-11-23,,,check-in,no,,Chapter 1,1',
       );
     });
 
     it('writes only the header when there is no history', async () => {
       const app = createTestApp();
       expect(await app.exportCsv.execute()).toBe(
-        'challenge,category,challenge_start,target,day,day_date,recorded_on,seconds,time,source,make_up,feeling,note',
+        'challenge,category,challenge_start,target,day,day_date,recorded_on,seconds,time,source,make_up,feeling,note,count',
       );
     });
   });
