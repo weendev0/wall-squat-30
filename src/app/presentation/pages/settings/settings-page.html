@@ -2,6 +2,22 @@
   <a class="back" routerLink="/today">‹ Today</a>
   <h1 class="screen-title">Settings</h1>
 
+  <section aria-labelledby="look-heading">
+    <h2 id="look-heading" class="field-label">Look</h2>
+    <div class="looks" role="group" aria-labelledby="look-heading">
+      @for (look of looks; track look.theme) {
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="themeStore.theme() === look.theme"
+          (click)="themeStore.setTheme(look.theme)"
+        >
+          {{ look.label }}
+        </button>
+      }
+    </div>
+  </section>
+
   <section aria-labelledby="timer-heading">
     <h2 id="timer-heading" class="field-label">Timer</h2>
     <dl class="card rows">

@@ -5,8 +5,8 @@
   "description": "Run 30-day challenges side by side: a timed wall squat, plus daily reading and study check-offs with notes.",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#121317",
-  "background_color": "#121317",
+  "theme_color": "#fff6f0",
+  "background_color": "#fff6f0",
   "scope": "./",
   "start_url": "./",
   "icons": [

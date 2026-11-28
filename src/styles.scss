@@ -1,6 +1,13 @@
-// Dark Coral Calm design tokens (see the UI canvas). The app is always dark.
+// Design tokens. Two looks share every screen (spec section 13):
+// - dark: Coral Calm, the original look
+// - cute: light pastel, rounded and soft (the cute design canvas)
+// The look is picked by data-theme on <html>; ThemeStore sets it and remembers the choice.
 :root {
   color-scheme: dark;
+  --font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif;
+  --radius-card: 16px;
+  --radius-button: 14px;
+  --shadow-card: none;
   --color-background: #121317;
   --color-surface: #1e2026;
   --color-border: #2a2c33;
@@ -13,6 +20,10 @@
   --color-accent-soft: #ffb39c;
   --color-accent-muted: #8c4a35; // under-target bars in the History chart
   --color-missed: #3a3d45;
+  --color-missed-text: #c9ccd2;
+  --color-chip-border: #3a3d45;
+  --color-dashed: #5a5d66;
+  --color-tab-bar: rgb(18 19 23 / 92%);
 
   // One colour family per kind of challenge (canvas board 12): coral for exercise,
   // sunny amber for reading, fresh mint for courses and study.
@@ -24,20 +35,57 @@
   --color-study-soft: #a6ebd6;
 }
 
+// Cute mode: cream background, white cards, plum ink and pastel tones.
+// Text colours are the darker shades so they stay readable on the light background (4.5:1).
+:root[data-theme='cute'] {
+  color-scheme: light;
+  --font-family: ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, sans-serif;
+  --radius-card: 24px;
+  --radius-button: 18px;
+  --shadow-card: 0 6px 18px rgb(255 138 122 / 14%);
+
+  --color-background: #fff6f0;
+  --color-surface: #ffffff;
+  --color-border: #f3dcd3;
+  --color-text-primary: #3b2f3a;
+  --color-text-secondary: #6e5f68;
+  --color-accent: #ff8a7a;
+  --color-accent-text: #b4432f;
+  --color-on-accent: #3b2f3a;
+  --color-accent-dim: #ffe1d9;
+  --color-accent-soft: #8a3f31;
+  --color-accent-muted: #ffc2b6;
+  --color-missed: #ede3e6;
+  --color-missed-text: #5e4f58;
+  --color-chip-border: #f3cfc5;
+  --color-dashed: #d9c3bc;
+  --color-tab-bar: rgb(255 255 255 / 92%);
+
+  --color-reading: #f5b841;
+  --color-reading-dim: #fff0c7;
+  --color-reading-soft: #6f4f0e;
+  --color-study: #5ed3b0;
+  --color-study-dim: #ddf6ee;
+  --color-study-soft: #1b5e4b;
+}
+
 /**
- * Tone classes set --tone, --tone-dim and --tone-soft for one challenge category,
+ * Tone classes set --tone, --tone-dim, --tone-soft and --tone-ink (text in the tone)
+ * for one challenge category,
  * so a card, pill or button can use the challenge's own colour without knowing which it is.
  */
 .tone-exercise {
   --tone: var(--color-accent);
   --tone-dim: var(--color-accent-dim);
   --tone-soft: var(--color-accent-soft);
+  --tone-ink: var(--color-accent-text);
 }
 
 .tone-reading {
   --tone: var(--color-reading);
   --tone-dim: var(--color-reading-dim);
   --tone-soft: var(--color-reading-soft);
+  --tone-ink: var(--color-reading);
 }
 
 .tone-course,
@@ -45,6 +93,19 @@
   --tone: var(--color-study);
   --tone-dim: var(--color-study-dim);
   --tone-soft: var(--color-study-soft);
+  --tone-ink: var(--color-study);
+}
+
+/** Text in the challenge's colour must be a darker shade on the light background. */
+:root[data-theme='cute'] {
+  .tone-reading {
+    --tone-ink: var(--color-reading-soft);
+  }
+
+  .tone-course,
+  .tone-study {
+    --tone-ink: var(--color-study-soft);
+  }
 }
 
 /** A small rounded label in the challenge's colour, e.g. READING. */
@@ -64,7 +125,7 @@ body {
   margin: 0;
   background: var(--color-background);
   color: var(--color-text-primary);
-  font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -120,8 +181,9 @@ textarea {
 .card {
   padding: 16px;
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   background: var(--color-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .button-primary,
@@ -129,7 +191,7 @@ textarea {
 .button-quiet {
   min-height: 52px;
   padding: 0 20px;
-  border-radius: 14px;
+  border-radius: var(--radius-button);
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
@@ -161,7 +223,7 @@ textarea {
 .chip {
   min-height: 40px;
   padding: 0 16px;
-  border: 1.5px solid #3a3d45;
+  border: 1.5px solid var(--color-chip-border);
   border-radius: 999px;
   background: transparent;
   font-weight: 600;
@@ -192,7 +254,12 @@ textarea {
   min-height: 48px;
   padding: 12px;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-button);
   background: var(--color-background);
   font-size: 17px; // 16px or more stops iOS from zooming in on focus
+}
+
+// Cute mode extras: a soft "pressable" edge under filled buttons.
+:root[data-theme='cute'] .button-primary:not(:disabled) {
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--color-accent) 70%, #000 12%);
 }

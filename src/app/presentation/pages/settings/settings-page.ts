@@ -10,10 +10,17 @@ import { Router, RouterLink } from '@angular/router';
 import { ExportHistoryCsvUseCase } from '../../../application';
 import { CLOCK, FILE_SHARER } from '../../../composition/provide-wall-squat';
 import { ChallengeStore } from '../../state/challenge-store';
+import { Theme, ThemeStore } from '../../state/theme-store';
 
 const CSV_MIME_TYPE = 'text/csv';
 
-/** Screen 7: the CSV backup and Reset all history (BR-11). */
+/** The two looks the user can pick (spec section 13). */
+const LOOKS: readonly { theme: Theme; label: string }[] = [
+  { theme: 'cute', label: 'Cute' },
+  { theme: 'dark', label: 'Dark' },
+];
+
+/** Screen 7: the look, the CSV backup and Reset all history (BR-11). */
 @Component({
   selector: 'app-settings-page',
   imports: [RouterLink],
@@ -34,6 +41,9 @@ export class SettingsPage implements OnInit {
    * sheet straight away: iOS refuses to share when the tap first waits for the database.
    */
   private readonly csv = signal<string | null>(null);
+
+  protected readonly themeStore = inject(ThemeStore);
+  protected readonly looks = LOOKS;
 
   protected readonly isConfirmingReset = signal(false);
   protected readonly message = signal('');

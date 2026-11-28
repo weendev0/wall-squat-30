@@ -20,6 +20,18 @@ describe('Settings screen', () => {
     expect(screen.currentUrl()).toBe('/settings');
   });
 
+  it('starts in the cute look and switches to dark and back', async () => {
+    const screen = await openScreen('/settings');
+    const root = document.documentElement;
+    expect(root.dataset['theme']).toBe('cute');
+
+    await screen.click('Dark');
+    expect(root.dataset['theme']).toBe('dark');
+
+    await screen.click('Cute');
+    expect(root.dataset['theme']).toBe('cute');
+  });
+
   it('shares the history as a CSV file named with today', async () => {
     const screen = await openScreen('/settings');
 

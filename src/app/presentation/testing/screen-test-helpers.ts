@@ -3,6 +3,7 @@ import { provideRouter, Router, withComponentInputBinding } from '@angular/route
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../../app.routes';
 import { provideWallSquatTesting } from '../../composition/testing/provide-wall-squat-testing';
+import { THEME_STORAGE } from '../state/theme-store';
 
 /**
  * Sets up the whole app with fakes, as on `today`. Call it in beforeEach,
@@ -11,7 +12,12 @@ import { provideWallSquatTesting } from '../../composition/testing/provide-wall-
 export function setUpApp(today = '2026-11-16') {
   const { providers, fakes } = provideWallSquatTesting(today);
   TestBed.configureTestingModule({
-    providers: [...providers, provideRouter(routes, withComponentInputBinding())],
+    providers: [
+      ...providers,
+      provideRouter(routes, withComponentInputBinding()),
+      // Screen tests never touch the real browser storage.
+      { provide: THEME_STORAGE, useValue: null },
+    ],
   });
   return fakes;
 }
