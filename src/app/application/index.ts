@@ -1,9 +1,13 @@
 // The application layer: use cases that combine domain rules with storage through ports.
 export * from './ports';
+export * from './use-cases/add-check-off-category.use-case';
 export * from './use-cases/add-timed-category.use-case';
 export * from './use-cases/check-in.use-case';
 export * from './use-cases/delete-attempt.use-case';
+export * from './use-cases/delete-check-off-category.use-case';
+export * from './use-cases/edit-check-off-category.use-case';
 export * from './use-cases/export-history-csv.use-case';
+export * from './use-cases/get-check-off-categories.use-case';
 export * from './use-cases/get-check-off-overviews.use-case';
 export * from './use-cases/get-session-history.use-case';
 export * from './use-cases/get-timed-categories.use-case';

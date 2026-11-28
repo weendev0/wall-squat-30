@@ -3,13 +3,19 @@ import {
   Challenge,
   CheckIn,
   CheckOffChallenge,
+  CustomCheckOffCategory,
   dateOfDay,
   formatDuration,
   isCheckOffChallenge,
   isTimedChallenge,
   TimedChallenge,
 } from '../../domain';
-import { AttemptRepository, ChallengeRepository, CheckInRepository } from '../ports';
+import {
+  AttemptRepository,
+  ChallengeRepository,
+  CheckInRepository,
+  CheckOffCategoryRepository,
+} from '../ports';
 
 const CSV_HEADER = [
   'challenge',
@@ -25,6 +31,7 @@ const CSV_HEADER = [
   'make_up',
   'feeling',
   'note',
+  'count',
 ];
 
 /** One CSV row with the challenge it belongs to, so rows can be sorted before writing. */
@@ -45,6 +52,7 @@ export class ExportHistoryCsvUseCase {
     private readonly challenges: ChallengeRepository,
     private readonly attempts: AttemptRepository,
     private readonly checkIns: CheckInRepository,
+    private readonly categories: CheckOffCategoryRepository,
   ) {}
 
   async execute(): Promise<string> {
@@ -56,9 +64,10 @@ export class ExportHistoryCsvUseCase {
       const challenge = timed.get(attempt.challengeId);
       return challenge ? [attemptRow(attempt, challenge)] : [];
     });
+    const categories = await this.categories.findAll();
     const checkInRows = (await this.checkIns.findAll()).flatMap((checkIn) => {
       const challenge = checkOff.get(checkIn.challengeId);
-      return challenge ? [checkInRow(checkIn, challenge)] : [];
+      return challenge ? [checkInRow(checkIn, challenge, categories)] : [];
     });
 
     const rows = [...attemptRows, ...checkInRows].sort(byChallengeThenDay).map((row) => row.values);
@@ -85,19 +94,28 @@ function attemptRow(attempt: Attempt, challenge: TimedChallenge): Row {
       attempt.isMakeUp ? 'yes' : 'no',
       attempt.feeling,
       attempt.note,
+      '',
     ],
   };
 }
 
-/** A check-in has no time or feeling, so those columns stay empty. */
-function checkInRow(checkIn: CheckIn, challenge: CheckOffChallenge): Row {
+/**
+ * A check-in has no time or feeling, so those columns stay empty.
+ * BR-21: a challenge in the user's own category shows that category's name.
+ */
+function checkInRow(
+  checkIn: CheckIn,
+  challenge: CheckOffChallenge,
+  categories: readonly CustomCheckOffCategory[],
+): Row {
+  const customCategory = categories.find(({ id }) => id === challenge.customCategoryId);
   return {
     challenge,
     dayNumber: checkIn.dayNumber,
     recordedOn: checkIn.recordedOn,
     values: [
       challenge.name,
-      challenge.category,
+      customCategory?.name ?? challenge.category,
       challenge.startDate,
       '',
       String(checkIn.dayNumber),
@@ -109,6 +127,7 @@ function checkInRow(checkIn: CheckIn, challenge: CheckOffChallenge): Row {
       checkIn.isMakeUp ? 'yes' : 'no',
       '',
       checkIn.note,
+      String(checkIn.count),
     ],
   };
 }

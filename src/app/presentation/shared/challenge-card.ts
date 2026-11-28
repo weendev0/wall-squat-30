@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { CHALLENGE_LENGTH_DAYS, ChallengeCategory, DayResult } from '../../domain';
-import { CATEGORY_LABELS, toneClass } from './challenge-category';
+import { CHALLENGE_LENGTH_DAYS, DayResult } from '../../domain';
+import { CategoryLook } from './challenge-category';
 
 const RECENT_DAY_COUNT = 7;
 
@@ -13,11 +13,16 @@ const RECENT_DAY_COUNT = 7;
   selector: 'app-challenge-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <article class="card challenge-card" [class]="tone()" [attr.aria-label]="name()">
+    <article class="card challenge-card" [class]="look().toneClass" [attr.aria-label]="name()">
       <div class="head">
         <div class="info">
           <div class="meta">
-            <span class="category-pill">{{ categoryLabel() }}</span>
+            <span class="category-pill">
+              @if (look().icon) {
+                <span aria-hidden="true">{{ look().icon }}</span>
+              }
+              {{ look().label }}
+            </span>
             <span class="muted small">Day {{ dayNumber() }} of {{ challengeLength }}</span>
           </div>
           <h2 class="name">{{ name() }}</h2>
@@ -25,6 +30,7 @@ const RECENT_DAY_COUNT = 7;
         </div>
         <ng-content />
       </div>
+      <ng-content select="[card-extra]" />
       <ol class="week" aria-label="Last 7 days">
         @for (day of recentDays(); track day.dayNumber) {
           <li
@@ -60,8 +66,10 @@ const RECENT_DAY_COUNT = 7;
     }
     .meta {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 4px 8px;
+      white-space: nowrap;
     }
     .name {
       margin: 0;
@@ -102,7 +110,8 @@ const RECENT_DAY_COUNT = 7;
   `,
 })
 export class ChallengeCard {
-  readonly category = input.required<ChallengeCategory>();
+  /** The colour, word and icon of the challenge's category. */
+  readonly look = input.required<CategoryLook>();
   readonly name = input.required<string>();
   readonly dayNumber = input.required<number>();
   readonly detail = input.required<string>();
@@ -111,8 +120,6 @@ export class ChallengeCard {
   readonly daysComplete = input.required<number>();
 
   protected readonly challengeLength = CHALLENGE_LENGTH_DAYS;
-  protected readonly tone = computed(() => toneClass(this.category()));
-  protected readonly categoryLabel = computed(() => CATEGORY_LABELS[this.category()]);
 
   /** The last 7 challenge days up to today, oldest first. */
   protected readonly recentDays = computed(() => {

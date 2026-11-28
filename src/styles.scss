@@ -33,6 +33,21 @@
   --color-study: #5ed3b0;
   --color-study-dim: #17352d;
   --color-study-soft: #a6ebd6;
+
+  // BR-21: extra pastel tones for the user's own check-off categories.
+  // -dim is a soft background, -ink is text in the tone, readable on the surface.
+  --color-sky: #4aa3e8;
+  --color-sky-dim: #15293a;
+  --color-sky-ink: #a9d6fa;
+  --color-lilac: #9c84e8;
+  --color-lilac-dim: #262040;
+  --color-lilac-ink: #d3c6fb;
+  --color-rose: #e8739f;
+  --color-rose-dim: #3a1d2a;
+  --color-rose-ink: #f9bcd4;
+  --color-leaf: #6dbb4a;
+  --color-leaf-dim: #1d3216;
+  --color-leaf-ink: #bfe6a8;
 }
 
 // Cute mode: cream background, white cards, plum ink and pastel tones.
@@ -67,6 +82,19 @@
   --color-study: #5ed3b0;
   --color-study-dim: #ddf6ee;
   --color-study-soft: #1b5e4b;
+
+  --color-sky: #6cb8f0;
+  --color-sky-dim: #ddeefc;
+  --color-sky-ink: #1d4f78;
+  --color-lilac: #b49cf0;
+  --color-lilac-dim: #eee6fd;
+  --color-lilac-ink: #4b3394;
+  --color-rose: #f28fb6;
+  --color-rose-dim: #fde3ee;
+  --color-rose-ink: #8a2552;
+  --color-leaf: #8fcf6a;
+  --color-leaf-dim: #e7f6dc;
+  --color-leaf-ink: #335f1a;
 }
 
 /**
@@ -81,7 +109,8 @@
   --tone-ink: var(--color-accent-text);
 }
 
-.tone-reading {
+.tone-reading,
+.tone-sun {
   --tone: var(--color-reading);
   --tone-dim: var(--color-reading-dim);
   --tone-soft: var(--color-reading-soft);
@@ -89,21 +118,53 @@
 }
 
 .tone-course,
-.tone-study {
+.tone-study,
+.tone-mint {
   --tone: var(--color-study);
   --tone-dim: var(--color-study-dim);
   --tone-soft: var(--color-study-soft);
   --tone-ink: var(--color-study);
 }
 
+/** BR-21: the tones only the user's own categories use. -ink doubles as -soft (pill text). */
+.tone-sky {
+  --tone: var(--color-sky);
+  --tone-dim: var(--color-sky-dim);
+  --tone-soft: var(--color-sky-ink);
+  --tone-ink: var(--color-sky-ink);
+}
+
+.tone-lilac {
+  --tone: var(--color-lilac);
+  --tone-dim: var(--color-lilac-dim);
+  --tone-soft: var(--color-lilac-ink);
+  --tone-ink: var(--color-lilac-ink);
+}
+
+.tone-rose {
+  --tone: var(--color-rose);
+  --tone-dim: var(--color-rose-dim);
+  --tone-soft: var(--color-rose-ink);
+  --tone-ink: var(--color-rose-ink);
+}
+
+.tone-leaf {
+  --tone: var(--color-leaf);
+  --tone-dim: var(--color-leaf-dim);
+  --tone-soft: var(--color-leaf-ink);
+  --tone-ink: var(--color-leaf-ink);
+}
+
 /** Text in the challenge's colour must be a darker shade on the light background. */
 :root[data-theme='cute'] {
-  .tone-reading {
+  .tone-reading,
+  .tone-sun {
     --tone-ink: var(--color-reading-soft);
   }
 
   .tone-course,
-  .tone-study {
+  .tone-study,
+  .tone-mint {
     --tone-ink: var(--color-study-soft);
   }
 }

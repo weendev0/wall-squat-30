@@ -100,18 +100,29 @@
       <div>
         <h2 class="field-label">Category</h2>
         <div class="categories">
-          @for (option of categories; track option) {
+          @for (chip of checkOffChips(); track chip.look.label) {
             <button
               type="button"
               class="chip category-chip"
-              [class]="toneClass(option)"
-              [attr.aria-pressed]="option === category()"
-              (click)="category.set(option)"
+              [class]="chip.look.toneClass"
+              [attr.aria-pressed]="isPicked(chip.choice)"
+              (click)="pickCheckOff(chip.choice)"
             >
-              {{ categoryLabels[option] }}
+              @if (chip.look.icon) {
+                <span aria-hidden="true">{{ chip.look.icon }}</span>
+              }
+              {{ chip.look.label }}
             </button>
           }
+          <button type="button" class="chip add-category" (click)="openAddSheet()">
+            + Add category
+          </button>
         </div>
+        @if (pickedCustom(); as custom) {
+          <button type="button" class="edit-category" (click)="openEditSheet(custom)">
+            Edit {{ custom.category.name }}
+          </button>
+        }
       </div>
 
       <label>
@@ -127,10 +138,20 @@
       </label>
 
       <p class="muted small">
-        Each day you tap Done and can add a note. No timer. A missed day can be made up later; it
-        counts toward your 30 days, not your streak.
+        {{ checkOffHint() }} A missed day can be made up later; it counts toward your 30 days, not
+        your streak.
       </p>
     </section>
+
+    @if (sheet(); as open) {
+      <app-category-sheet
+        [category]="open.mode === 'edit' ? open.option.category : null"
+        [canDelete]="open.mode === 'edit' && !open.option.isInUse"
+        (saved)="onCategorySaved($event)"
+        (deleted)="onCategoryDeleted()"
+        (closed)="closeSheet()"
+      />
+    }
   }
 
   @if (errorMessage()) {

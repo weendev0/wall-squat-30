@@ -3,6 +3,7 @@ import {
   Challenge,
   CheckIn,
   CountdownCue,
+  CustomCheckOffCategory,
   LocalDate,
   TimedCategory,
   TimerCue,
@@ -11,6 +12,7 @@ import {
   AttemptRepository,
   ChallengeRepository,
   CheckInRepository,
+  CheckOffCategoryRepository,
   Clock,
   FileSharer,
   IdGenerator,
@@ -112,6 +114,38 @@ export class InMemoryTimedCategoryRepository implements TimedCategoryRepository 
 
   async save(category: TimedCategory): Promise<void> {
     this.items.push(category);
+  }
+
+  async deleteAll(): Promise<void> {
+    this.items.length = 0;
+  }
+}
+
+export class InMemoryCheckOffCategoryRepository implements CheckOffCategoryRepository {
+  readonly items: CustomCheckOffCategory[] = [];
+
+  async findAll(): Promise<CustomCheckOffCategory[]> {
+    return [...this.items];
+  }
+
+  async findById(id: string): Promise<CustomCheckOffCategory | null> {
+    return this.items.find((category) => category.id === id) ?? null;
+  }
+
+  async save(category: CustomCheckOffCategory): Promise<void> {
+    const index = this.items.findIndex(({ id }) => id === category.id);
+    if (index === -1) {
+      this.items.push(category);
+    } else {
+      this.items[index] = category;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    const index = this.items.findIndex((category) => category.id === id);
+    if (index !== -1) {
+      this.items.splice(index, 1);
+    }
   }
 
   async deleteAll(): Promise<void> {

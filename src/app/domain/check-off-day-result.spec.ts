@@ -1,6 +1,6 @@
 import { calculateProgress } from './challenge-progress';
 import { buildCheckOffDayResults } from './day-result';
-import { aCheckIn, aCheckOffChallenge } from './testing/domain-builders';
+import { aCheckIn, aCheckOffChallenge, aWaterChallenge } from './testing/domain-builders';
 
 /** BR-14 to BR-18: a check-off challenge uses the same day results and streak rules as the wall squat. */
 describe('check-off day results', () => {
@@ -62,5 +62,31 @@ describe('check-off day results', () => {
     const days = buildCheckOffDayResults(challenge, [aCheckIn(challenge, 2)], today);
 
     expect(calculateProgress(days, [], today).daysToMakeUp).toEqual([1, 3, 4]);
+  });
+});
+
+describe('counted check-off day results (BR-22, BR-23)', () => {
+  const water = aWaterChallenge(); // 8 glasses a day, Day 1 = 16 Nov
+  const today = '2026-11-20'; // Day 5
+
+  it('a day short of its goal is under target; at the goal it is complete', () => {
+    const checkIns = [aCheckIn(water, 1, { count: 8 }), aCheckIn(water, 2, { count: 3 })];
+    const days = buildCheckOffDayResults(water, checkIns, today);
+
+    expect(days[0].status).toBe('complete');
+    expect(days[1].status).toBe('under-target');
+    expect(days[1].completedOnTime).toBe(false);
+  });
+
+  it('only finished days count toward the streak and the 30 days', () => {
+    const checkIns = [
+      aCheckIn(water, 3, { count: 8 }),
+      aCheckIn(water, 4, { count: 8 }),
+      aCheckIn(water, 5, { count: 2 }),
+    ];
+    const progress = calculateProgress(buildCheckOffDayResults(water, checkIns, today), [], today);
+
+    expect(progress.daysComplete).toBe(2);
+    expect(progress.currentStreak).toBe(2);
   });
 });

@@ -1,10 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, Signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CheckOffOverview, TimedOverview } from '../../application';
-import { ChallengeCategory } from '../../domain';
 import { ChallengeStore } from '../state/challenge-store';
-import { CheckOffStore } from '../state/check-off-store';
-import { toneClass } from './challenge-category';
+import { challengeLook } from './challenge-category';
 
 /** Which challenge Progress or History shows. */
 export type ChallengeSelection =
@@ -64,14 +62,23 @@ export function selectedChallenge(
       const current = selection();
       return current?.kind === 'checkoff' ? current.overview : null;
     }),
-    tone: computed(() => toneClass(selection()?.overview.challenge.category ?? 'exercise')),
+    tone: computed(() => toneOf(selection())),
   };
+}
+
+/** The tone class of a selection; exercise coral when nothing is selected. */
+function toneOf(selection: ChallengeSelection): string {
+  if (selection === null) {
+    return 'tone-exercise';
+  }
+  const customCategory = selection.kind === 'checkoff' ? selection.overview.customCategory : null;
+  return challengeLook(selection.overview.challenge, customCategory).toneClass;
 }
 
 interface Tab {
   readonly id: string;
   readonly label: string;
-  readonly category: ChallengeCategory;
+  readonly toneClass: string;
 }
 
 /**
@@ -88,7 +95,7 @@ interface Tab {
         @for (tab of tabs(); track tab.id) {
           <a
             class="tab"
-            [class]="toneClass(tab.category)"
+            [class]="tab.toneClass"
             [class.selected]="tab.id === selectedId()"
             [attr.aria-current]="tab.id === selectedId() ? 'page' : null"
             routerLink="."
@@ -134,17 +141,19 @@ export class ChallengeTabs {
   readonly checkOffs = input.required<readonly CheckOffOverview[]>();
   readonly selectedId = input.required<string | null>();
 
-  protected readonly toneClass = toneClass;
-
   protected readonly tabs = computed<Tab[]>(() => {
     const tabs: Tab[] = this.timed().map(({ challenge }) => ({
       id: challenge.id,
       label: challenge.name,
-      category: challenge.category,
+      toneClass: challengeLook(challenge).toneClass,
     }));
-    for (const { challenge } of this.checkOffs()) {
+    for (const { challenge, customCategory } of this.checkOffs()) {
       const label = challenge.status === 'active' ? challenge.name : `${challenge.name} (finished)`;
-      tabs.push({ id: challenge.id, label, category: challenge.category });
+      tabs.push({
+        id: challenge.id,
+        label,
+        toneClass: challengeLook(challenge, customCategory).toneClass,
+      });
     }
     return tabs;
   });

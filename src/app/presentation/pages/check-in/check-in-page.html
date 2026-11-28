@@ -1,8 +1,13 @@
 @let challenge = overview().challenge;
-<main class="screen" [class]="tone()">
+<main class="screen" [class]="look().toneClass">
   <a class="back-link" routerLink="/today">‹ Today</a>
   <div class="meta">
-    <span class="category-pill">{{ categoryLabels[challenge.category] }}</span>
+    <span class="category-pill">
+      @if (look().icon) {
+        <span aria-hidden="true">{{ look().icon }}</span>
+      }
+      {{ look().label }}
+    </span>
     <span class="muted small">
       Day {{ dayNumber() }} of {{ challengeLength }} · {{ dateLabel() }}
       @if (isMakeUp()) {
@@ -13,29 +18,56 @@
   <h1 class="screen-title">{{ challenge.name }}</h1>
 
   <section class="done-area">
-    <button
-      type="button"
-      class="done-button"
-      [class.is-done]="done()"
-      [attr.aria-pressed]="done()"
-      [attr.aria-label]="done() ? 'Done, tap to undo' : 'Mark as done'"
-      (click)="toggleDone()"
-    >
-      <svg
-        aria-hidden="true"
-        width="56"
-        height="56"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="3"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+    @if (isCounted()) {
+      <div class="counter" role="group" [attr.aria-label]="'Count of ' + challenge.unit">
+        <button
+          type="button"
+          class="count-button"
+          [attr.aria-label]="'One less'"
+          [disabled]="count() === 0"
+          (click)="changeCount(-1)"
+        >
+          −
+        </button>
+        <output class="count-value" [class.is-done]="count() >= challenge.dailyGoal">
+          <span class="count-number">{{ count() }}</span>
+          <span class="muted small">of {{ challenge.dailyGoal }} {{ challenge.unit }}</span>
+        </output>
+        <button
+          type="button"
+          class="count-button"
+          [attr.aria-label]="'One more'"
+          [disabled]="count() === maxCount"
+          (click)="changeCount(1)"
+        >
+          +
+        </button>
+      </div>
+    } @else {
+      <button
+        type="button"
+        class="done-button"
+        [class.is-done]="done()"
+        [attr.aria-pressed]="done()"
+        [attr.aria-label]="done() ? 'Done, tap to undo' : 'Mark as done'"
+        (click)="toggleDone()"
       >
-        <path d="M20 6 9 17l-5-5"></path>
-      </svg>
-      <span class="done-text">{{ done() ? 'Done!' : 'Done' }}</span>
-    </button>
+        <svg
+          aria-hidden="true"
+          width="56"
+          height="56"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M20 6 9 17l-5-5"></path>
+        </svg>
+        <span class="done-text">{{ done() ? 'Done!' : 'Done' }}</span>
+      </button>
+    }
     <p class="muted hint" aria-live="polite">{{ hint() }}</p>
   </section>
 

@@ -1,0 +1,140 @@
+@let current = fields();
+<div class="backdrop" (click)="closed.emit()"></div>
+<section
+  class="sheet"
+  [class]="'tone-' + current.tone"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="category-sheet-title"
+>
+  <div class="grab" aria-hidden="true"></div>
+  <h2 id="category-sheet-title" class="sheet-title">
+    {{ isEditing() ? 'Edit category' : 'New category' }}
+  </h2>
+
+  <label class="field">
+    <span class="field-label">Name</span>
+    <input
+      class="text-field"
+      aria-label="Category name"
+      [value]="current.name"
+      (input)="setName($any($event.target).value)"
+      [attr.maxlength]="maxNameLength"
+      placeholder="For example Water Drinking"
+      autocomplete="off"
+    />
+  </label>
+
+  <div class="field">
+    <span class="field-label" id="tone-label">Colour</span>
+    <div class="swatches" role="radiogroup" aria-labelledby="tone-label">
+      @for (tone of tones; track tone) {
+        <button
+          type="button"
+          role="radio"
+          class="swatch"
+          [class]="'tone-' + tone"
+          [attr.aria-checked]="tone === current.tone"
+          [attr.aria-label]="tone"
+          (click)="setTone(tone)"
+        ></button>
+      }
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="field-label" id="icon-label">Icon</span>
+    <div class="icons" role="radiogroup" aria-labelledby="icon-label">
+      @for (icon of icons; track icon) {
+        <button
+          type="button"
+          role="radio"
+          class="icon"
+          [attr.aria-checked]="icon === current.icon"
+          (click)="setIcon(icon)"
+        >
+          {{ icon }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="field-label" id="goal-label">Each day</span>
+    <div class="goal-kinds" role="radiogroup" aria-labelledby="goal-label">
+      <button
+        type="button"
+        role="radio"
+        class="goal-kind"
+        [attr.aria-checked]="!isCounted()"
+        (click)="setCounted(false)"
+      >
+        <strong>Just Done</strong>
+        <span class="muted small">One tap a day</span>
+      </button>
+      <button
+        type="button"
+        role="radio"
+        class="goal-kind"
+        [attr.aria-checked]="isCounted()"
+        (click)="setCounted(true)"
+      >
+        <strong>Count to a goal</strong>
+        <span class="muted small">Like 8 glasses</span>
+      </button>
+    </div>
+    @if (isCounted()) {
+      <div class="goal-row">
+        <button
+          type="button"
+          class="chip"
+          aria-label="Lower goal"
+          [disabled]="current.dailyGoal <= minGoal"
+          (click)="changeGoal(-1)"
+        >
+          −
+        </button>
+        <output class="goal-value" aria-live="polite">{{ current.dailyGoal }}</output>
+        <button
+          type="button"
+          class="chip"
+          aria-label="Higher goal"
+          [disabled]="current.dailyGoal >= maxGoal"
+          (click)="changeGoal(1)"
+        >
+          +
+        </button>
+        <input
+          class="text-field unit"
+          aria-label="What you count"
+          [value]="current.unit"
+          (input)="setUnit($any($event.target).value)"
+          [attr.maxlength]="maxUnitLength"
+          placeholder="glasses"
+          autocomplete="off"
+        />
+      </div>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <p class="error-text" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <div class="actions">
+    <button type="button" class="button-quiet" (click)="closed.emit()">Cancel</button>
+    <button type="button" class="button-primary save" [disabled]="isSaving()" (click)="save()">
+      {{ isEditing() ? 'Save category' : 'Add category' }}
+    </button>
+  </div>
+
+  @if (isEditing()) {
+    @if (canDelete()) {
+      <button type="button" class="button-quiet delete" [disabled]="isSaving()" (click)="delete()">
+        Delete category
+      </button>
+    } @else {
+      <p class="muted small">A challenge uses this category, so it stays to keep your history.</p>
+    }
+  }
+</section>

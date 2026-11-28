@@ -4,6 +4,7 @@ export * from './challenge';
 export * from './challenge-progress';
 export * from './challenge-rules.constants';
 export * from './check-in';
+export * from './check-off-category';
 export * from './day-result';
 export * from './domain-error';
 export * from './duration-format';

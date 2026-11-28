@@ -1,7 +1,11 @@
+import { AddCheckOffCategoryUseCase } from '../use-cases/add-check-off-category.use-case';
 import { AddTimedCategoryUseCase } from '../use-cases/add-timed-category.use-case';
 import { CheckInUseCase } from '../use-cases/check-in.use-case';
 import { DeleteAttemptUseCase } from '../use-cases/delete-attempt.use-case';
+import { DeleteCheckOffCategoryUseCase } from '../use-cases/delete-check-off-category.use-case';
+import { EditCheckOffCategoryUseCase } from '../use-cases/edit-check-off-category.use-case';
 import { ExportHistoryCsvUseCase } from '../use-cases/export-history-csv.use-case';
+import { GetCheckOffCategoriesUseCase } from '../use-cases/get-check-off-categories.use-case';
 import { GetCheckOffOverviewsUseCase } from '../use-cases/get-check-off-overviews.use-case';
 import { GetSessionHistoryUseCase } from '../use-cases/get-session-history.use-case';
 import { GetTimedCategoriesUseCase } from '../use-cases/get-timed-categories.use-case';
@@ -17,6 +21,7 @@ import {
   InMemoryAttemptRepository,
   InMemoryChallengeRepository,
   InMemoryCheckInRepository,
+  InMemoryCheckOffCategoryRepository,
   InMemoryTimedCategoryRepository,
   SequentialIdGenerator,
 } from './fakes';
@@ -27,6 +32,7 @@ export function createTestApp(startDate = '2026-11-16') {
   const attempts = new InMemoryAttemptRepository();
   const checkIns = new InMemoryCheckInRepository();
   const categories = new InMemoryTimedCategoryRepository();
+  const checkOffCategories = new InMemoryCheckOffCategoryRepository();
   const clock = new FakeClock(startDate);
   const ids = new SequentialIdGenerator();
 
@@ -35,20 +41,41 @@ export function createTestApp(startDate = '2026-11-16') {
     attempts,
     checkIns,
     categories,
+    checkOffCategories,
     clock,
     startChallenge: new StartChallengeUseCase(challenges, clock, ids),
-    startCheckOffChallenge: new StartCheckOffChallengeUseCase(challenges, clock, ids),
+    startCheckOffChallenge: new StartCheckOffChallengeUseCase(
+      challenges,
+      checkOffCategories,
+      clock,
+      ids,
+    ),
     checkIn: new CheckInUseCase(challenges, checkIns, clock, ids),
     undoCheckIn: new UndoCheckInUseCase(challenges, checkIns),
     getTimedOverviews: new GetTimedOverviewsUseCase(challenges, attempts, clock),
     getTimedCategories: new GetTimedCategoriesUseCase(categories),
     addTimedCategory: new AddTimedCategoryUseCase(categories, ids),
-    getCheckOffOverviews: new GetCheckOffOverviewsUseCase(challenges, checkIns, clock),
+    getCheckOffOverviews: new GetCheckOffOverviewsUseCase(
+      challenges,
+      checkIns,
+      checkOffCategories,
+      clock,
+    ),
     getSessionHistory: new GetSessionHistoryUseCase(challenges, attempts, clock),
     recordAttempt: new RecordAttemptUseCase(challenges, attempts, clock, ids),
     deleteAttempt: new DeleteAttemptUseCase(attempts),
     markCelebrationShown: new MarkCelebrationShownUseCase(challenges),
-    resetHistory: new ResetHistoryUseCase(challenges, attempts, checkIns, categories),
-    exportCsv: new ExportHistoryCsvUseCase(challenges, attempts, checkIns),
+    resetHistory: new ResetHistoryUseCase(
+      challenges,
+      attempts,
+      checkIns,
+      categories,
+      checkOffCategories,
+    ),
+    exportCsv: new ExportHistoryCsvUseCase(challenges, attempts, checkIns, checkOffCategories),
+    getCheckOffCategories: new GetCheckOffCategoriesUseCase(checkOffCategories, challenges),
+    addCheckOffCategory: new AddCheckOffCategoryUseCase(checkOffCategories, ids),
+    editCheckOffCategory: new EditCheckOffCategoryUseCase(checkOffCategories),
+    deleteCheckOffCategory: new DeleteCheckOffCategoryUseCase(checkOffCategories, challenges),
   };
 }

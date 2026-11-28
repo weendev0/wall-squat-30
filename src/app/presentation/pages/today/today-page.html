@@ -30,7 +30,7 @@
   <section class="cards" aria-label="Your challenges">
     @for (card of timedCards(); track card.overview.challenge.id) {
       <app-challenge-card
-        [category]="card.overview.challenge.category"
+        [look]="card.look"
         [name]="card.overview.challenge.name"
         [dayNumber]="card.today.dayNumber"
         [detail]="card.detail"
@@ -59,7 +59,7 @@
 
     @for (card of checkOffCards(); track card.overview.challenge.id) {
       <app-challenge-card
-        [category]="card.overview.challenge.category"
+        [look]="card.look"
         [name]="card.overview.challenge.name"
         [dayNumber]="card.dayNumber"
         [detail]="card.detail"
@@ -67,12 +67,35 @@
         [streak]="card.overview.progress.currentStreak"
         [daysComplete]="card.overview.progress.daysComplete"
       >
-        <a
-          class="card-action"
-          [class.is-done]="card.isDoneToday"
-          [routerLink]="['/check-in', card.overview.challenge.id]"
-          >{{ card.isDoneToday ? 'Done ✓' : 'Done' }}</a
-        >
+        @if (card.counter; as counter) {
+          <button
+            type="button"
+            class="card-action"
+            [class.is-done]="card.isDoneToday"
+            (click)="countOneMore(card)"
+          >
+            {{ counter.buttonLabel }}
+          </button>
+        } @else {
+          <a
+            class="card-action"
+            [class.is-done]="card.isDoneToday"
+            [routerLink]="['/check-in', card.overview.challenge.id]"
+            >{{ card.isDoneToday ? 'Done ✓' : 'Done' }}</a
+          >
+        }
+        @if (card.counter; as counter) {
+          <div card-extra class="counter">
+            <ol class="steps" [attr.aria-label]="card.detail">
+              @for (isCounted of counter.steps; track $index) {
+                <li class="step" [class.counted]="isCounted"></li>
+              }
+            </ol>
+            <a class="counter-link" [routerLink]="['/check-in', card.overview.challenge.id]"
+              >Count &amp; note</a
+            >
+          </div>
+        }
       </app-challenge-card>
     }
   </section>

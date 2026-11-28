@@ -1,6 +1,7 @@
 import Dexie from 'dexie';
 import { DexieAttemptRepository } from './dexie-attempt-repository';
 import { DexieChallengeRepository } from './dexie-challenge-repository';
+import { DexieCheckInRepository } from './dexie-check-in-repository';
 import { WallSquatDatabase } from './wall-squat-database';
 
 /**
@@ -86,6 +87,64 @@ describe('WallSquatDatabase upgrades', () => {
 
     expect(await new DexieChallengeRepository(upgraded).findById('c1')).toEqual(oldChallenge);
     expect(await upgraded.timedCategories.count()).toBe(0);
+    upgraded.close();
+  });
+
+  it('version 3 to 4: every old check-in stays done and old challenges become Just Done', async () => {
+    const version3 = new Dexie(name);
+    version3
+      .version(1)
+      .stores({ challenges: 'id, status, startDate', attempts: 'id, challengeId' });
+    version3.version(2).stores({ checkIns: 'id, challengeId, &[challengeId+dayNumber]' });
+    version3.version(3).stores({ timedCategories: 'id, order' });
+    const oldReading = {
+      id: 'r1',
+      name: 'Atomic Habits',
+      kind: 'checkoff',
+      category: 'reading',
+      startDate: '2026-11-16',
+      status: 'active',
+      completedOn: null,
+      celebrationShown: false,
+    };
+    const oldSquat = {
+      id: 'c1',
+      name: 'Wall Squat',
+      kind: 'timed',
+      category: 'exercise',
+      startDate: '2026-11-16',
+      targetSeconds: 60,
+      status: 'active',
+      completedOn: null,
+      celebrationShown: false,
+    };
+    const oldCheckIn = {
+      id: 'k1',
+      challengeId: 'r1',
+      dayNumber: 1,
+      recordedOn: '2026-11-16',
+      isMakeUp: false,
+      note: 'Chapter 1',
+    };
+    await version3.table('challenges').bulkPut([oldReading, oldSquat]);
+    await version3.table('checkIns').put(oldCheckIn);
+    version3.close();
+
+    const upgraded = new WallSquatDatabase(name);
+    const challenges = new DexieChallengeRepository(upgraded);
+
+    expect(await challenges.findById('r1')).toEqual({
+      ...oldReading,
+      customCategoryId: null,
+      dailyGoal: 1,
+      unit: '',
+    });
+    expect(await challenges.findById('c1')).toEqual(oldSquat);
+    expect(await new DexieCheckInRepository(upgraded).findByDay('r1', 1)).toEqual({
+      ...oldCheckIn,
+      count: 1,
+    });
+    expect(await upgraded.checkOffCategories.count()).toBe(0);
     upgraded.close();
   });
 });
